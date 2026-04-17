@@ -1,0 +1,183 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../core/constants/api_constants.dart';
+import '../../../core/repositories/pokemon_repository.dart';
+import '../../../core/services/socket_service.dart';
+import '../../../shared/models/lobby_state.dart';
+import '../../../shared/models/player.dart';
+import '../../../shared/models/pokemon.dart';
+
+/// ViewModel for LobbyScreen - manages lobby state and team selection.
+class LobbyViewModel extends ChangeNotifier {
+  final SharedPreferences _prefs;
+  final SocketService _socketService;
+  final PokemonRepository _pokemonRepository;
+
+  Lobby? _lobby;
+  String? _playerId;
+  String? _error;
+  bool _isConnected = false;
+  bool _isLoadingTeam = false;
+  List<PokemonDetail> _team = [];
+  List<String> _logMessages = [];
+  StreamSubscription? _lobbyStatusSub;
+  StreamSubscription? _battleStartSub;
+  StreamSubscription? _errorSub;
+
+  LobbyViewModel({
+    required SharedPreferences prefs,
+    required SocketService socketService,
+    required PokemonRepository pokemonRepository,
+  })  : _prefs = prefs,
+        _socketService = socketService,
+        _pokemonRepository = pokemonRepository;
+
+  Lobby? get lobby => _lobby;
+  String? get playerId => _playerId;
+  String? get error => _error;
+  bool get isConnected => _isConnected;
+  bool get isLoadingTeam => _isLoadingTeam;
+  List<PokemonDetail> get team => _team;
+  List<String> get logMessages => _logMessages;
+
+  Player? get currentPlayer => _lobby?.playerById(_playerId ?? '');
+  Player? get opponent => _lobby?.opponentOf(_playerId ?? '');
+  bool get canAssignTeam => currentPlayer != null && currentPlayer!.team.isEmpty;
+  bool get canReady => currentPlayer != null && currentPlayer!.team.isNotEmpty && !currentPlayer!.ready;
+  bool get isReady => currentPlayer?.ready ?? false;
+  bool get battleStarted => _lobby?.status == LobbyStatus.battling;
+
+  String? get nickname => _prefs.getString(ApiConstants.keyNickname);
+  String? get serverUrl => _prefs.getString(ApiConstants.keyServerUrl);
+
+  /// Initialize the lobby - connect socket and join.
+  Future<void> initialize() async {
+    final url = serverUrl;
+    final nick = nickname;
+
+    if (url == null || nick == null) {
+      _error = 'Missing configuration';
+      notifyListeners();
+      return;
+    }
+
+    _setupListeners();
+
+    try {
+      await _socketService.connect(url);
+      _isConnected = true;
+      _addLog('Conectando al servidor...');
+
+      final result = await _socketService.joinLobby(nick);
+      _playerId = result.playerId;
+      _addLog('Te uniste al lobby como $nick');
+      notifyListeners();
+    } catch (e) {
+      _error = 'Error al conectar: $e';
+      _addLog('Error: $_error');
+      notifyListeners();
+    }
+  }
+
+  void _setupListeners() {
+    _lobbyStatusSub = _socketService.lobbyStatusStream.listen((lobby) {
+      _lobby = lobby;
+      _addLog(_describeLobbyUpdate(lobby));
+      notifyListeners();
+    });
+
+    _battleStartSub = _socketService.battleStartStream.listen((lobby) {
+      _lobby = lobby;
+      _addLog('¡La batalla está por comenzar!');
+      notifyListeners();
+    });
+
+    _errorSub = _socketService.errorStream.listen((error) {
+      _error = error;
+      _addLog('Error: $error');
+      notifyListeners();
+    });
+  }
+
+  String _describeLobbyUpdate(Lobby lobby) {
+    final playerCount = lobby.players.length;
+    final readyCount = lobby.players.where((p) => p.ready).length;
+
+    if (playerCount == 1) {
+      return 'Esperando oponente...';
+    } else if (readyCount < playerCount) {
+      return '$readyCount/$playerCount jugadores listos';
+    } else {
+      return '¡Todos listos!';
+    }
+  }
+
+  /// Request random team assignment.
+  Future<void> assignTeam() async {
+    if (_isLoadingTeam) return;
+
+    _isLoadingTeam = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _socketService.assignPokemon();
+      _addLog('Equipo randomizado');
+    } catch (e) {
+      _error = 'Error al asignar equipo: $e';
+      _addLog('Error: $_error');
+    } finally {
+      _isLoadingTeam = false;
+      notifyListeners();
+    }
+  }
+
+  /// Mark player as ready.
+  Future<void> ready() async {
+    if (!canReady) return;
+
+    try {
+      await _socketService.ready();
+      _addLog('¡Estás listo!');
+    } catch (e) {
+      _error = 'Error al marcar listo: $e';
+      _addLog('Error: $_error');
+      notifyListeners();
+    }
+  }
+
+  /// Reset the lobby.
+  Future<void> resetLobby() async {
+    try {
+      await _socketService.resetLobby();
+      _lobby = null;
+      _team = [];
+      _addLog('Lobby reiniciado');
+      notifyListeners();
+    } catch (e) {
+      _error = 'Error al reiniciar: $e';
+      notifyListeners();
+    }
+  }
+
+  void _addLog(String message) {
+    final timestamp = DateTime.now();
+    _logMessages.add('[$timestamp] $message');
+
+    // Keep only last 50 messages
+    if (_logMessages.length > 50) {
+      _logMessages = _logMessages.sublist(_logMessages.length - 50);
+    }
+  }
+
+  @override
+  void dispose() {
+    _lobbyStatusSub?.cancel();
+    _battleStartSub?.cancel();
+    _errorSub?.cancel();
+    super.dispose();
+  }
+}
