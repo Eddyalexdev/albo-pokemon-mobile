@@ -9,7 +9,6 @@ import '../../../shared/models/lobby_state.dart';
 import '../../../shared/widgets/atoms/app_button.dart';
 import '../../../shared/widgets/molecules/status_chip.dart';
 import '../../../shared/widgets/molecules/trainer_card.dart';
-import '../../../shared/widgets/organisms/battle_log.dart';
 import '../viewmodel/lobby_viewmodel.dart';
 
 /// Lobby screen - waiting room before battle.
@@ -55,34 +54,22 @@ class _LobbyScreenState extends State<LobbyScreen> {
             });
           }
 
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              // Background
-              Image.asset(
-                'assets/bg/pallet_town.png',
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.none,
+          return Container(
+            color: DesignColors.cream,
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(viewModel),
+                  const SizedBox(height: DesignSpacing.lg),
+                  _buildTrainerCards(viewModel),
+                  const SizedBox(height: DesignSpacing.lg),
+                  _buildStatusMessage(viewModel),
+                  const Spacer(),
+                  _buildActions(viewModel),
+                  const SizedBox(height: DesignSpacing.lg),
+                ],
               ),
-              // Overlay
-              Container(
-                color: DesignColors.ink.withValues(alpha: 0.12),
-              ),
-              // Content
-              SafeArea(
-                child: Column(
-                  children: [
-                    _buildHeader(viewModel),
-                    const SizedBox(height: DesignSpacing.md),
-                    _buildTrainerCards(viewModel),
-                    const SizedBox(height: DesignSpacing.md),
-                    _buildActions(viewModel),
-                    const SizedBox(height: DesignSpacing.md),
-                    _buildLog(viewModel),
-                  ],
-                ),
-              ),
-            ],
+            ),
           );
         },
       ),
@@ -161,38 +148,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
     );
   }
 
-  Widget _buildActions(LobbyViewModel viewModel) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.md),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: viewModel.canAssignTeam ? viewModel.assignTeam : null,
-              child: Text(
-                viewModel.isLoadingTeam ? 'CARREGANDO...' : '🎲 EQUIPO',
-              ),
-            ),
-          ),
-          const SizedBox(width: DesignSpacing.md),
-          Expanded(
-            child: AppButton(
-              label: '✓ LISTO',
-              onPressed: viewModel.canReady ? viewModel.ready : null,
-              enabled: viewModel.canReady,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLog(LobbyViewModel viewModel) {
-    if (viewModel.currentPlayer?.team.isNotEmpty == true && !viewModel.isReady) {
+  Widget _buildStatusMessage(LobbyViewModel viewModel) {
+    if (viewModel.currentPlayer?.team.isEmpty ?? true) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.md),
         child: Text(
-          'Tocá un Pokémon para ver sus estadísticas',
+          'Tocá "EQUIPO" para recibir Pokémon',
           style: DesignTypography.bodySmall.copyWith(
             fontStyle: FontStyle.italic,
             color: DesignColors.goldDeep,
@@ -202,7 +163,20 @@ class _LobbyScreenState extends State<LobbyScreen> {
       );
     }
 
-    if (viewModel.isReady && viewModel.opponent?.ready != true) {
+    if (viewModel.isReady) {
+      if (viewModel.opponent?.ready ?? false) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.md),
+          child: Text(
+            '¡Ambos listos! Esperando batalla...',
+            style: DesignTypography.bodySmall.copyWith(
+              color: DesignColors.forest,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        );
+      }
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.md),
         child: Text(
@@ -216,10 +190,30 @@ class _LobbyScreenState extends State<LobbyScreen> {
       );
     }
 
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.md),
-        child: BattleLog(events: viewModel.logMessages),
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildActions(LobbyViewModel viewModel) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.md),
+      child: Row(
+        children: [
+          Expanded(
+            child: AppButton(
+              label: viewModel.isLoadingTeam ? 'CARGANDO...' : '🎲 EQUIPO',
+              onPressed: viewModel.isLoadingTeam ? null : viewModel.assignTeam,
+              enabled: !viewModel.isLoadingTeam && viewModel.currentPlayer != null,
+            ),
+          ),
+          const SizedBox(width: DesignSpacing.md),
+          Expanded(
+            child: AppButton(
+              label: '✓ LISTO',
+              onPressed: viewModel.canReady ? viewModel.ready : null,
+              enabled: viewModel.canReady,
+            ),
+          ),
+        ],
       ),
     );
   }

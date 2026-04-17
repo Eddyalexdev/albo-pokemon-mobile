@@ -40,8 +40,8 @@ class SocketService {
 
     // Ensure URL has proper format for socket.io
     String serverUrl = baseUrl.trim();
-    if (!serverUrl.endsWith('/')) {
-      serverUrl += '/';
+    if (serverUrl.endsWith('/')) {
+      serverUrl = serverUrl.substring(0, serverUrl.length - 1);
     }
 
     _socket = io.io(

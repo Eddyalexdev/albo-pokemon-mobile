@@ -139,11 +139,33 @@ class LobbyViewModel extends ChangeNotifier {
 
   /// Mark player as ready.
   Future<void> ready() async {
-    if (!canReady) return;
+    if (_playerId == null) {
+      _error = 'No estás en el lobby';
+      notifyListeners();
+      return;
+    }
+
+    if (currentPlayer == null) {
+      _error = 'Datos del jugador no encontrados';
+      notifyListeners();
+      return;
+    }
+
+    if (currentPlayer!.team.isEmpty) {
+      _error = 'Primero necesitás un equipo';
+      notifyListeners();
+      return;
+    }
+
+    if (currentPlayer!.ready) {
+      _error = 'Ya estás listo';
+      notifyListeners();
+      return;
+    }
 
     try {
       await _socketService.ready();
-      _addLog('¡Estás listo!');
+      _addLog('Listo enviado al servidor');
     } catch (e) {
       _error = 'Error al marcar listo: $e';
       _addLog('Error: $_error');
