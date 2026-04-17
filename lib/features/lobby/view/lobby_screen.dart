@@ -31,8 +31,14 @@ class _LobbyScreenState extends State<LobbyScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<LobbyViewModel>().initialize();
+      final viewModel = context.read<LobbyViewModel>();
+      viewModel.initialize();
       _audioService.playBgMusic();
+
+      // Listen for battle start event specifically
+      viewModel.onBattleStartEvent = () {
+        widget.onBattleStart();
+      };
     });
   }
 

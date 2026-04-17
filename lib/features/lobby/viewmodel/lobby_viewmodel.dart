@@ -27,6 +27,9 @@ class LobbyViewModel extends ChangeNotifier {
   StreamSubscription? _battleStartSub;
   StreamSubscription? _errorSub;
 
+  /// Callback triggered when battle should start
+  VoidCallback? onBattleStartEvent;
+
   LobbyViewModel({
     required SharedPreferences prefs,
     required SocketService socketService,
@@ -95,6 +98,8 @@ class LobbyViewModel extends ChangeNotifier {
       _lobby = lobby;
       _addLog('¡La batalla está por comenzar!');
       notifyListeners();
+      // Trigger navigation callback
+      onBattleStartEvent?.call();
     });
 
     _errorSub = _socketService.errorStream.listen((error) {
