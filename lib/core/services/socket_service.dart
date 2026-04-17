@@ -38,18 +38,27 @@ class SocketService {
   Future<void> connect(String baseUrl) async {
     if (_socket?.connected ?? false) return;
 
+    // Ensure URL has proper format for socket.io
+    String serverUrl = baseUrl.trim();
+    if (!serverUrl.endsWith('/')) {
+      serverUrl += '/';
+    }
+
     _socket = io.io(
-      baseUrl,
+      serverUrl,
       io.OptionBuilder()
           .setTransports(['websocket'])
+          .disableAutoConnect()
           .enableReconnection()
-          .enableAutoConnect()
-          .setReconnectionAttempts(5)
-          .setReconnectionDelay(1000)
+          .setReconnectionAttempts(3)
+          .setReconnectionDelay(500)
           .build(),
     );
 
     _setupListeners();
+
+    // Explicitly connect
+    _socket!.connect();
 
     final completer = Completer<void>();
     _socket!.onConnect((_) {
@@ -60,8 +69,19 @@ class SocketService {
         completer.completeError(Exception(err.toString()));
       }
     });
+    _socket!.on('connect', (_) {
+      if (!completer.isCompleted) completer.complete();
+    });
 
-    return completer.future;
+    // Timeout after 10 seconds
+    return completer.future.timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        if (!completer.isCompleted) {
+          completer.completeError(Exception('Connection timeout - check server URL'));
+        }
+      },
+    );
   }
 
   void _setupListeners() {

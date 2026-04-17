@@ -60,20 +60,22 @@ class LobbyViewModel extends ChangeNotifier {
 
     if (url == null || nick == null) {
       _error = 'Missing configuration';
+      _addLog('Error: Falta URL o nickname');
       notifyListeners();
       return;
     }
 
+    _addLog('Conectando a $url...');
     _setupListeners();
 
     try {
       await _socketService.connect(url);
       _isConnected = true;
-      _addLog('Conectando al servidor...');
+      _addLog('Conectado! Uniéndote al lobby...');
 
       final result = await _socketService.joinLobby(nick);
       _playerId = result.playerId;
-      _addLog('Te uniste al lobby como $nick');
+      _addLog('Te uniste al lobby como $nick (ID: $_playerId)');
       notifyListeners();
     } catch (e) {
       _error = 'Error al conectar: $e';
