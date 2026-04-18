@@ -41,39 +41,37 @@ class _BattleScreenState extends State<BattleScreen> {
     return Scaffold(
       body: Consumer<BattleViewModel>(
         builder: (context, viewModel, _) {
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              // Background
-              Image.asset(
-                'assets/bg/route_01.png',
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.none,
+          return Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.0, 0.55, 1.0],
+                colors: [
+                  Color(0xFF87CEEB), // sky
+                  Color(0xFFB5D9A4), // light grass
+                  Color(0xFF8FB87A), // deeper grass
+                ],
               ),
-              // Overlay
-              Container(
-                color: DesignColors.ink.withValues(alpha: 0.2),
-              ),
-              // Content
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(DesignSpacing.md),
-                  child: Column(
-                    children: [
-                      _buildHeader(viewModel),
-                      const SizedBox(height: DesignSpacing.lg),
-                      _buildBattleArea(viewModel),
-                      const SizedBox(height: DesignSpacing.md),
-                      _buildTeamStatus(viewModel),
-                      const SizedBox(height: DesignSpacing.md),
-                      _buildActions(viewModel),
-                      const SizedBox(height: DesignSpacing.md),
-                      Expanded(child: BattleLog(events: viewModel.battleLog)),
-                    ],
-                  ),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(DesignSpacing.md),
+                child: Column(
+                  children: [
+                    _buildHeader(viewModel),
+                    const SizedBox(height: DesignSpacing.lg),
+                    _buildBattleArea(viewModel),
+                    const SizedBox(height: DesignSpacing.md),
+                    _buildTeamStatus(viewModel),
+                    const SizedBox(height: DesignSpacing.md),
+                    _buildActions(viewModel),
+                    const SizedBox(height: DesignSpacing.md),
+                    Expanded(child: BattleLog(events: viewModel.battleLog)),
+                  ],
                 ),
               ),
-            ],
+            ),
           );
         },
       ),
