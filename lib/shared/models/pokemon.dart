@@ -1,5 +1,13 @@
 import 'package:equatable/equatable.dart';
 
+int? _parseInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
+}
+
 /// Pokemon type enum for type safety.
 enum PokemonType {
   normal,
@@ -92,13 +100,6 @@ class PokemonDetail extends PokemonSummary {
       attack: _parseInt(json['attack']) ?? 50,
       defense: _parseInt(json['defense']) ?? 50,
     );
-  }
-
-  static int? _parseInt(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value);
-    return null;
   }
 
   @override
