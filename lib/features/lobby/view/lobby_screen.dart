@@ -53,13 +53,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
     return Scaffold(
       body: Consumer<LobbyViewModel>(
         builder: (context, viewModel, _) {
-          // Listen for battle start
-          if (viewModel.battleStarted) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              widget.onBattleStart();
-            });
-          }
-
           return Container(
             color: DesignColors.cream,
             child: SafeArea(
