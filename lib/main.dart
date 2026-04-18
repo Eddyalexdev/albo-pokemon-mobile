@@ -102,6 +102,7 @@ class PokemonStadiumApp extends StatelessWidget {
               ),
         ),
         ChangeNotifierProvider<BattleViewModel>(
+          lazy: false,
           create: (_) => BattleViewModel(
             socketService: _.read<SocketService>(),
           ),
