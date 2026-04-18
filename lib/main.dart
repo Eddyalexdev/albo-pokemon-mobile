@@ -111,6 +111,7 @@ class PokemonStadiumApp extends StatelessWidget {
         title: 'Pokémon Stadium Lite',
         theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
+        navigatorKey: _navigatorKey,
         initialRoute: initialRoute,
         onGenerateRoute: _onGenerateRoute,
       ),
