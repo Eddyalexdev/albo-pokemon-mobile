@@ -91,9 +91,7 @@ class _BattleFieldState extends State<BattleField>
     required Player? player,
     required bool isOpponent,
   }) {
-    final team = player?.team;
-    final BattlePokemon? pokemon =
-        team != null && team.isNotEmpty ? team.first as BattlePokemon : null;
+    final BattlePokemon? pokemon = player?.activePokemon;
 
     return Column(
       children: [

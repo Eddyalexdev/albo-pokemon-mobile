@@ -146,8 +146,12 @@ class _BattleScreenState extends State<BattleScreen> {
   }
 
   Widget _buildTeamStatus(BattleViewModel viewModel) {
-    // Create mock team status (6 slots) - in real app this would come from lobby
-    final teamStatus = List.generate(6, (i) => i < 3);
+    final player = viewModel.currentPlayer;
+    if (player == null || player.team.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final teamStatus = player.team.map((p) => !p.isFainted).toList();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -160,7 +164,7 @@ class _BattleScreenState extends State<BattleScreen> {
         ),
         PokeballIndicator(
           teamStatus: teamStatus,
-          activeIndex: 0,
+          activeIndex: player.activeIndex,
         ),
       ],
     );

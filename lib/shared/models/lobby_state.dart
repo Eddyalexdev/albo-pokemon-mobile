@@ -79,11 +79,9 @@ class Lobby extends Equatable {
     return null;
   }
 
-  /// Get current active Pokemon for a player (first non-fainted).
-  PokemonSummary? activePokemonFor(String playerId) {
-    final player = playerById(playerId);
-    if (player == null || player.team.isEmpty) return null;
-    return player.team.first;
+  /// Get current active Pokemon for a player using the server-provided activeIndex.
+  BattlePokemon? activePokemonFor(String playerId) {
+    return playerById(playerId)?.activePokemon;
   }
 
   @override

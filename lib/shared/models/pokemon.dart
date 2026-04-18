@@ -105,9 +105,12 @@ class PokemonDetail extends PokemonSummary {
   List<Object?> get props => [...super.props, maxHp, attack, defense];
 }
 
-/// In-memory Pokemon with current HP for battle.
+/// Pokemon as it appears inside a Player.team payload from the server.
+/// Carries current hp, max hp, stats and defeated flag — mirrors the
+/// backend Pokemon contract (see web-new domain/types).
 class BattlePokemon extends PokemonDetail {
   final int currentHp;
+  final bool defeated;
 
   const BattlePokemon({
     required super.id,
@@ -118,7 +121,30 @@ class BattlePokemon extends PokemonDetail {
     required super.attack,
     required super.defense,
     required this.currentHp,
+    this.defeated = false,
   });
+
+  factory BattlePokemon.fromJson(Map<String, dynamic> json) {
+    final typesList = (json['types'] as List<dynamic>? ?? json['type'] as List<dynamic>?)
+            ?.map((t) => PokemonType.fromString(t as String))
+            .toList() ??
+        [PokemonType.normal];
+
+    final maxHp = _parseInt(json['maxHp']) ?? 100;
+    final currentHp = _parseInt(json['hp']) ?? _parseInt(json['currentHp']) ?? maxHp;
+
+    return BattlePokemon(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      sprite: json['sprite']?.toString() ?? '',
+      types: typesList,
+      maxHp: maxHp,
+      attack: _parseInt(json['attack']) ?? 50,
+      defense: _parseInt(json['defense']) ?? 50,
+      currentHp: currentHp,
+      defeated: json['defeated'] == true,
+    );
+  }
 
   factory BattlePokemon.fromDetail(PokemonDetail detail, {int? hp}) {
     return BattlePokemon(
@@ -133,7 +159,7 @@ class BattlePokemon extends PokemonDetail {
     );
   }
 
-  BattlePokemon copyWith({int? currentHp}) {
+  BattlePokemon copyWith({int? currentHp, bool? defeated}) {
     return BattlePokemon(
       id: id,
       name: name,
@@ -143,13 +169,14 @@ class BattlePokemon extends PokemonDetail {
       attack: attack,
       defense: defense,
       currentHp: currentHp ?? this.currentHp,
+      defeated: defeated ?? this.defeated,
     );
   }
 
   double get hpPercent => maxHp > 0 ? (currentHp / maxHp).clamp(0.0, 1.0) : 0.0;
 
-  bool get isFainted => currentHp <= 0;
+  bool get isFainted => defeated || currentHp <= 0;
 
   @override
-  List<Object?> get props => [...super.props, currentHp];
+  List<Object?> get props => [...super.props, currentHp, defeated];
 }
