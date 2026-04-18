@@ -7,12 +7,18 @@ import '../../shared/models/lobby_state.dart';
 /// Service for Socket.IO communication with the battle server.
 class SocketService {
   io.Socket? _socket;
+  String? _currentPlayerId;
 
   final _lobbyStatusController = StreamController<Lobby>.broadcast();
   final _battleStartController = StreamController<Lobby>.broadcast();
   final _turnResultController = StreamController<({Lobby lobby, TurnRecord turn})>.broadcast();
   final _battleEndController = StreamController<({Lobby lobby, String winnerPlayerId})>.broadcast();
   final _errorController = StreamController<String>.broadcast();
+
+  /// Player id returned by the server after a successful join_lobby.
+  /// Shared across view models so navigation between screens does not need
+  /// to pass this through arguments.
+  String? get currentPlayerId => _currentPlayerId;
 
   /// Stream of lobby status updates.
   Stream<Lobby> get lobbyStatusStream => _lobbyStatusController.stream;
@@ -122,13 +128,16 @@ class SocketService {
     _socket?.disconnect();
     _socket?.dispose();
     _socket = null;
+    _currentPlayerId = null;
   }
 
   /// Join a lobby with the given nickname.
   Future<({String playerId, String lobbyId})> joinLobby(String nickname) async {
     final result = await _emitAck('join_lobby', {'nickname': nickname});
+    final playerId = result['playerId'] as String;
+    _currentPlayerId = playerId;
     return (
-      playerId: result['playerId'] as String,
+      playerId: playerId,
       lobbyId: result['lobbyId'] as String,
     );
   }

@@ -15,12 +15,15 @@ class BattleViewModel extends ChangeNotifier {
   String? _error;
   bool _isMyTurn = false;
   List<String> _battleLog = [];
+  StreamSubscription? _battleStartSub;
   StreamSubscription? _turnResultSub;
   StreamSubscription? _battleEndSub;
   StreamSubscription? _errorSub;
 
   BattleViewModel({required SocketService socketService})
-      : _socketService = socketService;
+      : _socketService = socketService {
+    _setupListeners();
+  }
 
   Lobby? get lobby => _lobby;
   String? get playerId => _playerId;
@@ -33,17 +36,16 @@ class BattleViewModel extends ChangeNotifier {
   String? get winnerId => _lobby?.winnerPlayerId;
   bool get battleEnded => _lobby?.status == LobbyStatus.finished;
 
-  /// Initialize with lobby from lobby screen.
-  void initialize(Lobby lobby, String playerId) {
-    _lobby = lobby;
-    _playerId = playerId;
-    _isMyTurn = lobby.currentTurnPlayerId == playerId;
-    _setupListeners();
-    _addLog('¡La batalla comenzó!');
-    notifyListeners();
-  }
-
   void _setupListeners() {
+    _battleStartSub = _socketService.battleStartStream.listen((lobby) {
+      _lobby = lobby;
+      _playerId = _socketService.currentPlayerId;
+      _isMyTurn = lobby.currentTurnPlayerId == _playerId;
+      _battleLog = [];
+      _addLog('¡La batalla comenzó!');
+      notifyListeners();
+    });
+
     _turnResultSub = _socketService.turnResultStream.listen((data) {
       _lobby = data.lobby;
       _isMyTurn = data.lobby.currentTurnPlayerId == _playerId;
@@ -112,6 +114,7 @@ class BattleViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _battleStartSub?.cancel();
     _turnResultSub?.cancel();
     _battleEndSub?.cancel();
     _errorSub?.cancel();
