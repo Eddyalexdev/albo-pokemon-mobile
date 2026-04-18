@@ -37,14 +37,14 @@ class _BattleFieldState extends State<BattleField>
     super.initState();
     _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 1600),
     );
-    _bounceAnimation = Tween<double>(begin: 0, end: -12).animate(
-          CurvedAnimation(
-            parent: _bounceController,
-            curve: Curves.bounceOut,
-          ),
-        );
+    _bounceAnimation = Tween<double>(begin: 0, end: -4).animate(
+      CurvedAnimation(
+        parent: _bounceController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     if (widget.animate) {
       _bounceController.repeat(reverse: true);
