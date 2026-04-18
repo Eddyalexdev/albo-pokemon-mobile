@@ -105,7 +105,7 @@ class TrainerCard extends StatelessWidget {
             border: Border.all(color: DesignColors.ink, width: 2),
           ),
           child: Text(
-            player!.ready ? '✓ LISTO' : '… ELIGIENDO',
+            player!.ready ? 'LISTO' : 'ELIGIENDO',
             style: DesignTypography.labelSmall.copyWith(
               color: player!.ready ? DesignColors.cream : DesignColors.ink,
             ),

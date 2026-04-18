@@ -199,7 +199,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
         children: [
           Expanded(
             child: AppButton(
-              label: viewModel.isLoadingTeam ? 'CARGANDO...' : '🎲 EQUIPO',
+              label: viewModel.isLoadingTeam ? 'CARGANDO...' : 'EQUIPO',
               onPressed: viewModel.isLoadingTeam ? null : viewModel.assignTeam,
               enabled: !viewModel.isLoadingTeam && viewModel.currentPlayer != null,
             ),
@@ -207,7 +207,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
           const SizedBox(width: DesignSpacing.md),
           Expanded(
             child: AppButton(
-              label: '✓ LISTO',
+              label: 'LISTO',
               onPressed: viewModel.canReady ? viewModel.ready : null,
               enabled: viewModel.canReady,
             ),

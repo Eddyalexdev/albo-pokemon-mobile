@@ -177,7 +177,7 @@ class _BattleScreenState extends State<BattleScreen> {
     }
 
     return AppButton(
-      label: '⚔ ATACAR',
+      label: 'ATACAR',
       onPressed: viewModel.isMyTurn ? viewModel.attack : null,
       enabled: viewModel.isMyTurn,
     );
