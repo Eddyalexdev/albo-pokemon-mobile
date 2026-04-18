@@ -16,6 +16,7 @@ class BattleViewModel extends ChangeNotifier {
   bool _isMyTurn = false;
   List<String> _battleLog = [];
   StreamSubscription? _battleStartSub;
+  StreamSubscription? _lobbyStatusSub;
   StreamSubscription? _turnResultSub;
   StreamSubscription? _battleEndSub;
   StreamSubscription? _errorSub;
@@ -43,6 +44,16 @@ class BattleViewModel extends ChangeNotifier {
       _isMyTurn = lobby.currentTurnPlayerId == _playerId;
       _battleLog = [];
       _addLog('¡La batalla comenzó!');
+      notifyListeners();
+    });
+
+    // The server emits lobby_status AFTER switchTurn(), so this is what
+    // actually rotates currentTurnPlayerId. turn_result arrives first but
+    // still carries the pre-rotation snapshot.
+    _lobbyStatusSub = _socketService.lobbyStatusStream.listen((lobby) {
+      if (_playerId == null) return;
+      _lobby = lobby;
+      _isMyTurn = lobby.currentTurnPlayerId == _playerId;
       notifyListeners();
     });
 
@@ -115,6 +126,7 @@ class BattleViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _battleStartSub?.cancel();
+    _lobbyStatusSub?.cancel();
     _turnResultSub?.cancel();
     _battleEndSub?.cancel();
     _errorSub?.cancel();
