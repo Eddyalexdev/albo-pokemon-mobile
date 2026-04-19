@@ -1,5 +1,7 @@
 # albo pokemon app mobile by Eddy
 
+[![Lint](https://github.com/Eddyalexdev/albo-pokemon-mobile/actions/workflows/lint.yml/badge.svg)](https://github.com/Eddyalexdev/albo-pokemon-mobile/actions/workflows/lint.yml)
+
 ![App Screenshot](assets/screenshot.png)
 
 Flutter app with Riverpod + socket_io_client following **Clean Architecture**.
