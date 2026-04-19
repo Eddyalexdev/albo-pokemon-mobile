@@ -63,6 +63,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   _buildHeader(viewModel),
                   const SizedBox(height: DesignSpacing.lg),
                   _buildTrainerCards(viewModel),
+                  const SizedBox(height: DesignSpacing.xs),
+                  _buildPokemonHint(viewModel),
                   const SizedBox(height: DesignSpacing.lg),
                   _buildStatusMessage(viewModel),
                   const Spacer(),
@@ -157,6 +159,26 @@ class _LobbyScreenState extends State<LobbyScreen> {
             isEmpty: viewModel.opponent == null,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPokemonHint(LobbyViewModel viewModel) {
+    // Only show hint if we have a team (not loading or empty)
+    if (viewModel.currentPlayer == null || viewModel.currentPlayer!.team.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.md),
+      child: Text(
+        'Tocá un Pokémon para ver las estadísticas',
+        style: DesignTypography.bodySmall.copyWith(
+          fontStyle: FontStyle.italic,
+          color: DesignColors.goldDeep,
+          fontSize: 11,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }

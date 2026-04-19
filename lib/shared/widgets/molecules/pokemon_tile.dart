@@ -39,7 +39,7 @@ class PokemonTile extends StatelessWidget {
           border: Border.all(color: DesignColors.ink, width: 3),
           boxShadow: const [BoxShadow(color: DesignColors.ink, offset: Offset(0, 3), blurRadius: 0)],
         ),
-        child: compact ? _buildCompactContent() : _buildFullContent(),
+        child: compact ? _buildCompactContent(context) : _buildFullContent(),
       ),
     );
   }
@@ -57,20 +57,31 @@ class PokemonTile extends StatelessWidget {
     );
   }
 
-  Widget _buildCompactContent() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildSprite(height: 48),
-        const SizedBox(height: 2),
-        Text(
-          pokemon.name,
-          style: DesignTypography.labelSmall.copyWith(color: DesignColors.ink),
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-        ),
-      ],
+  Widget _buildCompactContent(BuildContext context) {
+    return GestureDetector(
+      onTap: () => showDetailModal(context, pokemon),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildSprite(height: 48),
+          const SizedBox(height: 2),
+          Text(
+            pokemon.name,
+            style: DesignTypography.labelSmall.copyWith(color: DesignColors.ink),
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show a detail modal for this Pokemon.
+  static void showDetailModal(BuildContext context, PokemonDetail pokemon) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => _PokemonDetailDialog(pokemon: pokemon),
     );
   }
 
@@ -362,5 +373,142 @@ class _StatBar extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Dialog showing full Pokemon stats.
+class _PokemonDetailDialog extends StatelessWidget {
+  final PokemonDetail pokemon;
+
+  const _PokemonDetailDialog({required this.pokemon});
+
+  @override
+  Widget build(BuildContext context) {
+    final dexId = pokemon.id.padLeft(3, '0');
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(DesignSpacing.lg),
+        decoration: BoxDecoration(
+          color: DesignColors.cream,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: DesignColors.ink, width: 3),
+          boxShadow: [
+            BoxShadow(
+              color: DesignColors.ink.withValues(alpha: 0.3),
+              offset: const Offset(4, 4),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '#$dexId',
+                  style: DesignTypography.statsSmall.copyWith(
+                    color: DesignColors.goldDeep,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  pokemon.name,
+                  style: DesignTypography.displayMedium.copyWith(
+                    color: DesignColors.ink,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: DesignSpacing.md),
+
+            // Sprite
+            Container(
+              padding: const EdgeInsets.all(DesignSpacing.sm),
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: const Alignment(0, -0.3),
+                  radius: 1.2,
+                  colors: [DesignColors.cream, DesignColors.cream.withValues(alpha: 0)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Image.network(
+                pokemon.sprite,
+                height: 100,
+                width: 100,
+                filterQuality: FilterQuality.none,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.catching_pokemon,
+                  color: DesignColors.goldDeep,
+                  size: 64,
+                ),
+              ),
+            ),
+            const SizedBox(height: DesignSpacing.sm),
+
+            // Type pills
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: pokemon.types.map((type) {
+                final color = DesignColors.forType(type.name);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: DesignSpacing.sm,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: DesignColors.ink, width: 2),
+                    ),
+                    child: Text(
+                      type.name.toUpperCase(),
+                      style: DesignTypography.statsSmall.copyWith(
+                        color: _typeTextColor(type.name),
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: DesignSpacing.md),
+
+            // Stats
+            _StatBar(label: 'HP', value: pokemon.maxHp, max: 200, index: 0),
+            _StatBar(label: 'ATK', value: pokemon.attack, max: 180, index: 1),
+            _StatBar(label: 'DEF', value: pokemon.defense, max: 180, index: 2),
+            _StatBar(label: 'SPD', value: pokemon.speed, max: 180, index: 3),
+            const SizedBox(height: DesignSpacing.md),
+
+            // Close button
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'CERRAR',
+                style: DesignTypography.labelSmall.copyWith(
+                  color: DesignColors.goldDeep,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _typeTextColor(String type) {
+    return switch (type.toLowerCase()) {
+      'dragon' || 'dark' => DesignColors.cream,
+      _ => DesignColors.ink,
+    };
   }
 }
