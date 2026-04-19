@@ -40,7 +40,20 @@ Future<String> _getInitialRoute(SharedPreferences prefs) async {
     return '/start';
   }
 
-  return '/lobby';
+  // URL and nickname exist - perform health check
+  try {
+    final configViewModel = ConfigViewModel(prefs: prefs);
+    configViewModel.updateUrl(serverUrl);
+
+    final isHealthy = await configViewModel.healthCheck();
+    if (isHealthy) {
+      return '/lobby';
+    }
+  } catch (_) {
+    // Health check failed - fall through to config
+  }
+
+  return '/config';
 }
 
 class PokemonStadiumApp extends StatelessWidget {
@@ -143,8 +156,10 @@ class PokemonStadiumApp extends StatelessWidget {
         return MaterialPageRoute(
           builder: (_) => LobbyScreen(
             onBattleStart: () {
-              // Navigate to battle when it starts
               _navigatorKey.currentState?.pushReplacementNamed('/battle');
+            },
+            onNicknameChange: () {
+              _navigatorKey.currentState?.pushReplacementNamed('/start');
             },
           ),
         );

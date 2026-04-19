@@ -15,6 +15,14 @@ class BattleViewModel extends ChangeNotifier {
   String? _error;
   bool _isMyTurn = false;
   List<String> _battleLog = [];
+  bool _shouldReturnToStart = false;
+  bool _inBattle = false;
+
+  // Transient UI flags
+  bool _battleJustStarted = false;
+  String? _lastDefeatedPokemon;
+  bool _resultDialogShown = false;
+
   StreamSubscription<Lobby>? _battleStartSub;
   StreamSubscription<Lobby>? _lobbyStatusSub;
   StreamSubscription<({Lobby lobby, TurnRecord turn})>? _turnResultSub;
@@ -31,6 +39,10 @@ class BattleViewModel extends ChangeNotifier {
   String? get error => _error;
   bool get isMyTurn => _isMyTurn;
   List<String> get battleLog => _battleLog;
+  bool get shouldReturnToStart => _shouldReturnToStart;
+  bool get battleJustStarted => _battleJustStarted;
+  String? get lastDefeatedPokemon => _lastDefeatedPokemon;
+  bool get resultDialogShown => _resultDialogShown;
 
   Player? get currentPlayer => _lobby?.playerById(_playerId ?? '');
   Player? get opponent => _lobby?.opponentOf(_playerId ?? '');
@@ -43,6 +55,11 @@ class BattleViewModel extends ChangeNotifier {
       _playerId = _socketService.currentPlayerId;
       _isMyTurn = lobby.currentTurnPlayerId == _playerId;
       _battleLog = [];
+      _inBattle = true;
+      _shouldReturnToStart = false;
+      _resultDialogShown = false;
+      _battleJustStarted = true;
+      _lastDefeatedPokemon = null;
       _addLog('¡La batalla comenzó!');
       notifyListeners();
     });
@@ -54,6 +71,13 @@ class BattleViewModel extends ChangeNotifier {
       if (_playerId == null) return;
       _lobby = lobby;
       _isMyTurn = lobby.currentTurnPlayerId == _playerId;
+
+      // If we're in battle but opponent disappears, navigate to start
+      if (_inBattle && lobby.status == LobbyStatus.waiting) {
+        _shouldReturnToStart = true;
+        _addLog('El oponente se fue. Volviendo al inicio...');
+      }
+
       notifyListeners();
     });
 
@@ -69,6 +93,7 @@ class BattleViewModel extends ChangeNotifier {
         _addLog('${defender.nickname} recibe ${data.turn.damage} de daño');
 
         if (data.turn.defenderDefeated) {
+          _lastDefeatedPokemon = defender.nickname;
           _addLog('¡${defender.nickname} fue derrotado!');
         }
       }
@@ -79,6 +104,7 @@ class BattleViewModel extends ChangeNotifier {
     _battleEndSub = _socketService.battleEndStream.listen((data) {
       _lobby = data.lobby;
       _isMyTurn = false;
+      _inBattle = false;
 
       final winner = data.lobby.playerById(data.winnerPlayerId);
       if (winner != null) {
@@ -93,6 +119,26 @@ class BattleViewModel extends ChangeNotifier {
       _addLog('Error: $error');
       notifyListeners();
     });
+  }
+
+  /// Clear the navigation flag after navigating away.
+  void clearNavigationFlag() {
+    _shouldReturnToStart = false;
+  }
+
+  /// Clear the battle started flag after showing banner.
+  void clearBattleStartFlag() {
+    _battleJustStarted = false;
+  }
+
+  /// Clear the defeated pokemon flag after showing banner.
+  void clearDefeatedFlag() {
+    _lastDefeatedPokemon = null;
+  }
+
+  /// Mark that the result dialog has been shown.
+  void markResultDialogShown() {
+    _resultDialogShown = true;
   }
 
   /// Execute an attack.

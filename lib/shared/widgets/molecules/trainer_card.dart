@@ -4,6 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/models/player.dart';
+import '../../../shared/models/pokemon.dart';
 import 'pokemon_tile.dart';
 
 /// Molecule displaying player trainer info with team.
@@ -12,6 +13,7 @@ class TrainerCard extends StatelessWidget {
   final String label;
   final Color accentColor;
   final bool isEmpty;
+  final bool isLoadingTeam;
 
   const TrainerCard({
     super.key,
@@ -19,38 +21,57 @@ class TrainerCard extends StatelessWidget {
     required this.label,
     this.accentColor = DesignColors.crimson,
     this.isEmpty = false,
+    this.isLoadingTeam = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(DesignSpacing.md),
-      decoration: BoxDecoration(
-        color: DesignColors.cream,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: accentColor, width: 2),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          const SizedBox(height: DesignSpacing.md),
-          _buildTeam(),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        // Mobile (< 380px): compact tiles only (full content doesn't fit)
+        // Tablet/desktop: full stats tiles
+        final isCompact = width < 380;
+
+        final tileWidth = (width - (DesignSpacing.md * 2) - (DesignSpacing.xs * 4)) / 3;
+        // Compact: sprite + name only. Full: sprite + types + stats
+        final tileContentHeight = tileWidth * 0.85 + (isCompact ? 56.0 : 104.0);
+        final cardPadding = DesignSpacing.md * 2;
+        final headerHeight = isCompact ? 32.0 : 40.0;
+        final spacing = isCompact ? DesignSpacing.sm : DesignSpacing.md;
+
+        final cardHeight = cardPadding + headerHeight + spacing + tileContentHeight;
+
+        return Container(
+          height: cardHeight,
+          padding: const EdgeInsets.all(DesignSpacing.md),
+          decoration: BoxDecoration(
+            color: DesignColors.cream,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: accentColor, width: 2),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(isCompact: isCompact),
+              SizedBox(height: spacing),
+              Expanded(child: _buildTeam(isCompact: isCompact)),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader({required bool isCompact}) {
     if (player == null) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label.toUpperCase(),
-            style: DesignTypography.labelMedium.copyWith(
-              color: DesignColors.ink,
-            ),
+            style: (isCompact ? DesignTypography.labelSmall : DesignTypography.labelMedium)
+                .copyWith(color: DesignColors.ink),
           ),
           Container(
             padding: const EdgeInsets.symmetric(
@@ -81,15 +102,13 @@ class TrainerCard extends StatelessWidget {
             children: [
               TextSpan(
                 text: '$label: ',
-                style: DesignTypography.labelMedium.copyWith(
-                  color: DesignColors.ink,
-                ),
+                style: (isCompact ? DesignTypography.labelSmall : DesignTypography.labelMedium)
+                    .copyWith(color: DesignColors.ink),
               ),
               TextSpan(
                 text: player!.nickname,
-                style: DesignTypography.labelMedium.copyWith(
-                  color: accentColor,
-                ),
+                style: (isCompact ? DesignTypography.labelSmall : DesignTypography.labelMedium)
+                    .copyWith(color: accentColor),
               ),
             ],
           ),
@@ -115,7 +134,14 @@ class TrainerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTeam() {
+  Widget _buildTeam({required bool isCompact}) {
+    // Skeleton matches tile mode
+    if (isLoadingTeam && (player == null || player!.team.isEmpty)) {
+      return Row(
+        children: List.generate(3, (_) => Expanded(child: _SkeletonTile(isCompact: isCompact))),
+      );
+    }
+
     if (isEmpty || player == null || player!.team.isEmpty) {
       return Center(
         child: Padding(
@@ -132,15 +158,35 @@ class TrainerCard extends StatelessWidget {
       );
     }
 
+    // Show compact tiles on mobile, full tiles on tablet+
     return Row(
       children: player!.team
           .map((pokemon) => Expanded(
                 child: PokemonTile(
                   pokemon: pokemon,
-                  compact: true,
+                  compact: isCompact,
                 ),
               ))
           .toList(),
+    );
+  }
+}
+
+/// Skeleton tile for loading state.
+class _SkeletonTile extends StatelessWidget {
+  final bool isCompact;
+
+  const _SkeletonTile({required this.isCompact});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.xs),
+      child: PokemonTile(
+        pokemon: PokemonDetail(id: '', name: '', sprite: '', types: [], maxHp: 0, attack: 0, defense: 0, speed: 0),
+        isLoading: true,
+        compact: isCompact,
+      ),
     );
   }
 }

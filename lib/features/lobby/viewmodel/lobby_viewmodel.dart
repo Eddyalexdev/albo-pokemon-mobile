@@ -28,6 +28,9 @@ class LobbyViewModel extends ChangeNotifier {
   /// Callback triggered when battle should start
   VoidCallback? onBattleStartEvent;
 
+  /// Callback triggered when user wants to change nickname
+  VoidCallback? onNicknameChange;
+
   LobbyViewModel({
     required SharedPreferences prefs,
     required SocketService socketService,

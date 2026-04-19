@@ -74,6 +74,7 @@ class PokemonDetail extends PokemonSummary {
   final int maxHp;
   final int attack;
   final int defense;
+  final int speed;
 
   const PokemonDetail({
     required super.id,
@@ -83,6 +84,7 @@ class PokemonDetail extends PokemonSummary {
     required this.maxHp,
     required this.attack,
     required this.defense,
+    required this.speed,
   });
 
   factory PokemonDetail.fromJson(Map<String, dynamic> json) {
@@ -99,11 +101,12 @@ class PokemonDetail extends PokemonSummary {
       maxHp: _parseInt(json['maxHp']) ?? _parseInt(json['hp']) ?? 100,
       attack: _parseInt(json['attack']) ?? 50,
       defense: _parseInt(json['defense']) ?? 50,
+      speed: _parseInt(json['speed']) ?? 50,
     );
   }
 
   @override
-  List<Object?> get props => [...super.props, maxHp, attack, defense];
+  List<Object?> get props => [...super.props, maxHp, attack, defense, speed];
 }
 
 /// Pokemon as it appears inside a Player.team payload from the server.
@@ -121,6 +124,7 @@ class BattlePokemon extends PokemonDetail {
     required super.maxHp,
     required super.attack,
     required super.defense,
+    required super.speed,
     required this.currentHp,
     this.defeated = false,
   });
@@ -142,12 +146,13 @@ class BattlePokemon extends PokemonDetail {
       maxHp: maxHp,
       attack: _parseInt(json['attack']) ?? 50,
       defense: _parseInt(json['defense']) ?? 50,
+      speed: _parseInt(json['speed']) ?? 50,
       currentHp: currentHp,
       defeated: json['defeated'] == true,
     );
   }
 
-  factory BattlePokemon.fromDetail(PokemonDetail detail, {int? hp}) {
+factory BattlePokemon.fromDetail(PokemonDetail detail, {int? hp}) {
     return BattlePokemon(
       id: detail.id,
       name: detail.name,
@@ -156,6 +161,7 @@ class BattlePokemon extends PokemonDetail {
       maxHp: detail.maxHp,
       attack: detail.attack,
       defense: detail.defense,
+      speed: detail.speed,
       currentHp: hp ?? detail.maxHp,
     );
   }
@@ -169,6 +175,7 @@ class BattlePokemon extends PokemonDetail {
       maxHp: maxHp,
       attack: attack,
       defense: defense,
+      speed: speed,
       currentHp: currentHp ?? this.currentHp,
       defeated: defeated ?? this.defeated,
     );

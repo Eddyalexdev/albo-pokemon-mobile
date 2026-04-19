@@ -77,11 +77,16 @@ class ActiveBar extends StatelessWidget {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 height: 12,
-                width: MediaQuery.of(context).size.width * _hpPercent * 0.3,
-                decoration: BoxDecoration(
-                  color: _barColor,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: DesignColors.ink, width: 1),
+                alignment: Alignment.centerLeft,
+                child: FractionallySizedBox(
+                  widthFactor: _hpPercent,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: _barColor,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: DesignColors.ink, width: 1),
+                    ),
+                  ),
                 ),
               ),
             ],

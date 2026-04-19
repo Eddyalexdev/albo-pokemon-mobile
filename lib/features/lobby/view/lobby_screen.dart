@@ -14,10 +14,12 @@ import '../viewmodel/lobby_viewmodel.dart';
 /// Lobby screen - waiting room before battle.
 class LobbyScreen extends StatefulWidget {
   final VoidCallback onBattleStart;
+  final VoidCallback? onNicknameChange;
 
   const LobbyScreen({
     super.key,
     required this.onBattleStart,
+    this.onNicknameChange,
   });
 
   @override
@@ -106,6 +108,17 @@ class _LobbyScreenState extends State<LobbyScreen> {
               ],
             ),
           ),
+          if (widget.onNicknameChange != null)
+            TextButton(
+              onPressed: widget.onNicknameChange,
+              child: Text(
+                'CAMBIAR',
+                style: DesignTypography.statsSmall.copyWith(
+                  color: DesignColors.goldDeep,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
           StatusChip(
             text: viewModel.lobby?.status.name ?? 'connecting',
             color: _statusChipColor(viewModel.lobby?.status),
@@ -134,6 +147,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
             player: viewModel.currentPlayer,
             label: 'Tú',
             accentColor: DesignColors.crimson,
+            isLoadingTeam: viewModel.isLoadingTeam,
           ),
           const SizedBox(height: DesignSpacing.sm),
           TrainerCard(
@@ -193,15 +207,18 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   Widget _buildActions(LobbyViewModel viewModel) {
+    final canAssign = viewModel.canAssignTeam && !viewModel.isLoadingTeam;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.md),
       child: Row(
         children: [
           Expanded(
             child: AppButton(
-              label: viewModel.isLoadingTeam ? 'CARGANDO...' : 'EQUIPO',
-              onPressed: viewModel.isLoadingTeam ? null : viewModel.assignTeam,
-              enabled: !viewModel.isLoadingTeam && viewModel.currentPlayer != null,
+              label: viewModel.isLoadingTeam ? 'CARGANDO...' : 'ASIGNAR EQUIPO',
+              onPressed: canAssign ? viewModel.assignTeam : null,
+              enabled: canAssign,
+              variant: AppButtonVariant.gold
             ),
           ),
           const SizedBox(width: DesignSpacing.md),
