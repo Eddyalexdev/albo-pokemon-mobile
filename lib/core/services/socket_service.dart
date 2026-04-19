@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../shared/models/lobby_state.dart';
+import '../../shared/models/pokemon.dart';
 
 /// Service for Socket.IO communication with the battle server.
 class SocketService {
   io.Socket? _socket;
   String? _currentPlayerId;
 
+  // Stream controllers for each event type
   final _lobbyStatusController = StreamController<Lobby>.broadcast();
   final _battleStartController = StreamController<Lobby>.broadcast();
   final _turnResultController = StreamController<({Lobby lobby, TurnRecord turn})>.broadcast();
@@ -54,7 +56,7 @@ class SocketService {
   Future<void> connect(String baseUrl) async {
     if (_socket?.connected ?? false) return;
 
-    // Ensure URL has proper format for socket.io
+    // Ensure URL has proper format for socket.io (remove trailing slash if present)
     String serverUrl = baseUrl.trim();
     if (serverUrl.endsWith('/')) {
       serverUrl = serverUrl.substring(0, serverUrl.length - 1);
@@ -72,24 +74,23 @@ class SocketService {
     );
 
     _setupListeners();
-
-    // Explicitly connect
     _socket!.connect();
 
     final completer = Completer<void>();
+
+    // Handle successful connection
     _socket!.onConnect((_) {
       if (!completer.isCompleted) completer.complete();
     });
+
+    // Handle connection error
     _socket!.onConnectError((err) {
       if (!completer.isCompleted) {
         completer.completeError(Exception(err.toString()));
       }
     });
-    _socket!.on('connect', (_) {
-      if (!completer.isCompleted) completer.complete();
-    });
 
-    // Timeout after 10 seconds
+    // Timeout after 10 seconds if no response
     return completer.future.timeout(
       const Duration(seconds: 10),
       onTimeout: () {
@@ -119,14 +120,14 @@ class SocketService {
       ));
     });
 
+    // Pokemon defeated event - find pokemon name from lobby state
     _socket!.on('pokemon_defeated', (data) {
       final map = Map<String, dynamic>.from(data as Map);
       final lobby = Lobby.fromJson(Map<String, dynamic>.from(map['lobby'] as Map));
       final playerId = map['playerId']?.toString() ?? '';
       final pokemonId = (map['pokemonId'] as num?)?.toInt() ?? 0;
-      // Get pokemon name from lobby
-      final player = lobby.playerById(playerId);
-      final pokemonName = player?.team.firstWhere((p) => p.id == pokemonId.toString(), orElse: () => player.team.first).name ?? 'Pokémon';
+      final pokemonName = _findPokemonName(lobby, playerId, pokemonId);
+
       _pokemonDefeatedController.add((
         lobby: lobby,
         playerId: playerId,
@@ -135,14 +136,14 @@ class SocketService {
       ));
     });
 
+    // Pokemon entered event - find pokemon name from lobby state
     _socket!.on('pokemon_entered', (data) {
       final map = Map<String, dynamic>.from(data as Map);
       final lobby = Lobby.fromJson(Map<String, dynamic>.from(map['lobby'] as Map));
       final playerId = map['playerId']?.toString() ?? '';
       final pokemonId = (map['pokemonId'] as num?)?.toInt() ?? 0;
-      // Get pokemon name from lobby
-      final player = lobby.playerById(playerId);
-      final pokemonName = player?.team.firstWhere((p) => p.id == pokemonId.toString(), orElse: () => player.team.first).name ?? 'Pokémon';
+      final pokemonName = _findPokemonName(lobby, playerId, pokemonId);
+
       _pokemonEnteredController.add((
         lobby: lobby,
         playerId: playerId,
@@ -163,6 +164,22 @@ class SocketService {
       final map = Map<String, dynamic>.from(data as Map);
       _errorController.add(map['message']?.toString() ?? 'Unknown error');
     });
+  }
+
+  /// Find pokemon name by id from a player's team in the lobby.
+  /// Returns 'Pokémon' as fallback if not found.
+  String _findPokemonName(Lobby lobby, String playerId, int pokemonId) {
+    final player = lobby.playerById(playerId);
+    if (player == null) return 'Pokémon';
+
+    // Try to find pokemon with matching id
+    // If not found, return first pokemon in team as fallback
+    final pokemon = player.team.cast<BattlePokemon?>().firstWhere(
+      (p) => p?.id == pokemonId.toString(),
+      orElse: () => player.team.isNotEmpty ? player.team.first : null,
+    );
+
+    return pokemon?.name ?? 'Pokémon';
   }
 
   /// Disconnect from the server.

@@ -61,22 +61,24 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
   }
 
   void _showTransientBanner(String message, {Duration duration = const Duration(seconds: 3)}) {
+    // Show banner with animation
     setState(() {
       _bannerMessage = message;
       _showBanner = true;
     });
     _bannerController.forward();
+
+    // Schedule banner hide after duration
     Future.delayed(duration, () {
-      if (mounted) {
-        _bannerController.reverse().then((_) {
-          if (mounted) {
-            setState(() {
-              _showBanner = false;
-              _bannerMessage = null;
-            });
-          }
+      if (!mounted) return;
+
+      _bannerController.reverse().then((_) {
+        if (!mounted) return;
+        setState(() {
+          _showBanner = false;
+          _bannerMessage = null;
         });
-      }
+      });
     });
   }
 
@@ -264,7 +266,7 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
               border: Border.all(color: DesignColors.ink, width: 2),
             ),
             child: Text(
-              viewModel.isMyTurn ? 'YOUR TURN' : 'ENEMY TURN',
+              viewModel.isMyTurn ? 'TU TURNO' : 'TURNO DEL ENEMIGO',
               style: DesignTypography.labelSmall.copyWith(
                 color: DesignColors.cream,
               ),

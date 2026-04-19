@@ -183,10 +183,15 @@ class BattleViewModel extends ChangeNotifier {
   }
 
   void _addLog(String message) {
-    final timestamp = DateTime.now().toString().substring(11, 19);
+    // Format: HH:mm:ss using DateTime fields for clarity
+    final now = DateTime.now();
+    final timestamp = '${now.hour.toString().padLeft(2, '0')}:'
+        '${now.minute.toString().padLeft(2, '0')}:'
+        '${now.second.toString().padLeft(2, '0')}';
+
     _battleLog.add('[$timestamp] $message');
 
-    // Keep only last 50 messages
+    // Keep only last 50 messages to avoid memory bloat
     if (_battleLog.length > 50) {
       _battleLog = _battleLog.sublist(_battleLog.length - 50);
     }

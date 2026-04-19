@@ -122,8 +122,8 @@ class _StartScreenState extends State<StartScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             AppInput(
-                              labelText: 'Your Nickname',
-                              hintText: 'Enter nickname',
+                              labelText: 'TU Nickname',
+                              hintText: 'Ingresa tu nickname',
                               controller: _nicknameController,
                               onChanged: viewModel.updateNickname,
                               maxLength: 12,
@@ -140,7 +140,7 @@ class _StartScreenState extends State<StartScreen> {
                             ],
                             const SizedBox(height: DesignSpacing.lg),
                             AppButton(
-                              label: 'START',
+                              label: 'CONTINUAR',
                               onPressed: viewModel.isValid ? _handleStart : null,
                               enabled: viewModel.isValid,
                             ),

@@ -21,8 +21,12 @@ class PokemonTile extends StatelessWidget {
     this.onTap,
   });
 
-  // Stat max values for bar rendering (matches web)
-  static const _statMax = {0: 200, 1: 180, 2: 180, 3: 180};
+  // Stat bar max values for percentage calculation (matches web design)
+  // Key: 0=HP, 1=ATK, 2=DEF, 3=SPD
+  static const _statMaxHp = 200;
+  static const _statMaxAtk = 180;
+  static const _statMaxDef = 180;
+  static const _statMaxSpd = 180;
 
   @override
   Widget build(BuildContext context) {
@@ -204,10 +208,10 @@ class PokemonTile extends StatelessWidget {
   Widget _buildStats(PokemonDetail detail) {
     return Column(
       children: [
-        _StatBar(label: 'HP', value: detail.maxHp, max: _statMax[0]!, index: 0),
-        _StatBar(label: 'ATK', value: detail.attack, max: _statMax[1]!, index: 1),
-        _StatBar(label: 'DEF', value: detail.defense, max: _statMax[2]!, index: 2),
-        _StatBar(label: 'SPD', value: detail.speed, max: _statMax[3]!, index: 3),
+        _StatBar(label: 'HP', value: detail.maxHp, max: _statMaxHp, index: 0),
+        _StatBar(label: 'ATK', value: detail.attack, max: _statMaxAtk, index: 1),
+        _StatBar(label: 'DEF', value: detail.defense, max: _statMaxDef, index: 2),
+        _StatBar(label: 'SPD', value: detail.speed, max: _statMaxSpd, index: 3),
       ],
     );
   }

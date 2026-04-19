@@ -183,6 +183,9 @@ factory BattlePokemon.fromDetail(PokemonDetail detail, {int? hp}) {
 
   double get hpPercent => maxHp > 0 ? (currentHp / maxHp).clamp(0.0, 1.0) : 0.0;
 
+  /// A Pokemon is defeated if:
+  /// - The server marked it as defeated (e.g., HP reached 0)
+  /// - OR its current HP dropped to 0 or below
   bool get isFainted => defeated || currentHp <= 0;
 
   @override
