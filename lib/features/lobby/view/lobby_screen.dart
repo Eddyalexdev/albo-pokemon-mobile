@@ -166,7 +166,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.md),
         child: Text(
-          'Tocá "EQUIPO" para recibir Pokémon',
+          'Tocá "ASIGNAR EQUIPO" para recibir 3 Pokémons',
           style: DesignTypography.bodySmall.copyWith(
             fontStyle: FontStyle.italic,
             color: DesignColors.goldDeep,

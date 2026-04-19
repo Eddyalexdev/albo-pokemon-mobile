@@ -18,6 +18,7 @@ class LobbyViewModel extends ChangeNotifier {
   String? _playerId;
   String? _error;
   bool _isConnected = false;
+  bool _isJoined = false;
   bool _isLoadingTeam = false;
   List<PokemonDetail> _team = [];
   List<String> _logMessages = [];
@@ -41,13 +42,20 @@ class LobbyViewModel extends ChangeNotifier {
   String? get playerId => _playerId;
   String? get error => _error;
   bool get isConnected => _isConnected;
+  bool get isJoined => _isJoined;
   bool get isLoadingTeam => _isLoadingTeam;
   List<PokemonDetail> get team => _team;
   List<String> get logMessages => _logMessages;
 
   Player? get currentPlayer => _lobby?.playerById(_playerId ?? '');
   Player? get opponent => _lobby?.opponentOf(_playerId ?? '');
-  bool get canAssignTeam => currentPlayer != null && currentPlayer!.team.isEmpty;
+  bool get canAssignTeam {
+    // Can assign if: joined lobby AND not loading AND (no team yet OR team exists but is empty)
+    if (!_isJoined || _isLoadingTeam) return false;
+    // If currentPlayer is null, lobby status hasn't arrived yet - allow anyway
+    if (currentPlayer == null) return true;
+    return currentPlayer!.team.isEmpty;
+  }
   bool get canReady => currentPlayer != null && currentPlayer!.team.isNotEmpty && !currentPlayer!.ready;
   bool get isReady => currentPlayer?.ready ?? false;
   bool get battleStarted => _lobby?.status == LobbyStatus.battling;
@@ -77,6 +85,7 @@ class LobbyViewModel extends ChangeNotifier {
 
       final result = await _socketService.joinLobby(nick);
       _playerId = result.playerId;
+      _isJoined = true;
       _addLog('Te uniste al lobby como $nick (ID: $_playerId)');
       notifyListeners();
     } catch (e) {
