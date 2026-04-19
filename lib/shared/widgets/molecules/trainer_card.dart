@@ -180,12 +180,12 @@ class _SkeletonTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.xs),
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: DesignSpacing.xs),
       child: PokemonTile(
         pokemon: PokemonDetail(id: '', name: '', sprite: '', types: [], maxHp: 0, attack: 0, defense: 0, speed: 0),
         isLoading: true,
-        compact: isCompact,
+        compact: false,
       ),
     );
   }

@@ -81,15 +81,12 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
   }
 
   void _showBattleResult(bool isVictory, String winnerName) {
-    final isVictoryFinal = isVictory;
-    final message = '$winnerName gana la batalla!';
-
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => _BattleResultDialog(
-        isVictory: isVictoryFinal,
-        message: message,
+        isVictory: isVictory,
+        message: '$winnerName gana la batalla!',
         onDismiss: () {
           Navigator.of(context).pop();
           _navigateToStart();
