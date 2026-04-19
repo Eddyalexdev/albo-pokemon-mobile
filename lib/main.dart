@@ -82,15 +82,15 @@ class PokemonStadiumApp extends StatelessWidget {
 
         // ViewModels
         ChangeNotifierProvider<ConfigViewModel>(
-          create: (_) => ConfigViewModel(prefs: _.read<SharedPreferences>()),
+          create: (ctx) => ConfigViewModel(prefs: ctx.read<SharedPreferences>()),
         ),
         ChangeNotifierProvider<StartViewModel>(
-          create: (_) => StartViewModel(prefs: _.read<SharedPreferences>()),
+          create: (ctx) => StartViewModel(prefs: ctx.read<SharedPreferences>()),
         ),
         ChangeNotifierProxyProvider2<SharedPreferences, SocketService, LobbyViewModel>(
-          create: (_) => LobbyViewModel(
-            prefs: _.read<SharedPreferences>(),
-            socketService: _.read<SocketService>(),
+          create: (ctx) => LobbyViewModel(
+            prefs: ctx.read<SharedPreferences>(),
+            socketService: ctx.read<SocketService>(),
           ),
           update: (_, prefs, socketService, previous) =>
               previous ??
@@ -101,8 +101,8 @@ class PokemonStadiumApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<BattleViewModel>(
           lazy: false,
-          create: (_) => BattleViewModel(
-            socketService: _.read<SocketService>(),
+          create: (ctx) => BattleViewModel(
+            socketService: ctx.read<SocketService>(),
           ),
         ),
       ],

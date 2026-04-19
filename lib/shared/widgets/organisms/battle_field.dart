@@ -179,10 +179,10 @@ class _BattleFieldState extends State<BattleField>
       height: 96,
       width: 96,
       filterQuality: FilterQuality.none,
-      errorBuilder: (_, __, ___) => SizedBox(
+      errorBuilder: (_, __, ___) => const SizedBox(
         height: 96,
         width: 96,
-        child: const Icon(
+        child: Icon(
           Icons.catching_pokemon,
           color: DesignColors.goldDeep,
           size: 48,
