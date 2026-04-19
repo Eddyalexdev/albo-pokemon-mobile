@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 jobs:
-  flutter analyze:
+  flutter-analyze:
     runs-on: ubuntu-latest
 
     steps:
