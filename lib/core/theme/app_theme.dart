@@ -8,7 +8,7 @@ abstract final class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: DesignColors.crimson,
         onPrimary: DesignColors.cream,
         secondary: DesignColors.gold,

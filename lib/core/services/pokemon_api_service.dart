@@ -14,7 +14,7 @@ class PokemonApiService {
 
   /// Fetch all Pokemon summaries from GET /list.
   Future<List<PokemonSummary>> fetchPokemonList() async {
-    final response = await _dio.get('$baseUrl/list');
+    final response = await _dio.get<Object>('$baseUrl/list');
     final data = response.data;
 
     if (data is List) {
@@ -29,7 +29,7 @@ class PokemonApiService {
   /// Fetch Pokemon detail from GET /list?id={id}.
   Future<PokemonDetail?> fetchPokemonDetail(String id) async {
     try {
-      final response = await _dio.get(
+      final response = await _dio.get<Object>(
         '$baseUrl/list',
         queryParameters: {'id': id},
       );

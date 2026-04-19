@@ -6,7 +6,6 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../shared/models/pokemon.dart';
 import '../../../shared/models/player.dart';
 import '../molecules/active_bar.dart';
-import '../molecules/pokeball_indicator.dart';
 
 /// Organism displaying the battle arena with two Pokemon platforms.
 class BattleField extends StatefulWidget {

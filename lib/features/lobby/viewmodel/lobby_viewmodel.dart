@@ -23,9 +23,9 @@ class LobbyViewModel extends ChangeNotifier {
   bool _isLoadingTeam = false;
   List<PokemonDetail> _team = [];
   List<String> _logMessages = [];
-  StreamSubscription? _lobbyStatusSub;
-  StreamSubscription? _battleStartSub;
-  StreamSubscription? _errorSub;
+  StreamSubscription<Lobby>? _lobbyStatusSub;
+  StreamSubscription<Lobby>? _battleStartSub;
+  StreamSubscription<String>? _errorSub;
 
   /// Callback triggered when battle should start
   VoidCallback? onBattleStartEvent;

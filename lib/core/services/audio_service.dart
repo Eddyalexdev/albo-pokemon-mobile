@@ -28,9 +28,9 @@ class AudioService {
 
     // Crossfade: lower bg, raise battle over 500ms
     _bgMusicPlayer.setVolume(0.3);
-    await Future.delayed(const Duration(milliseconds: 250));
+    await Future<void>.delayed(const Duration(milliseconds: 250));
     await _battleMusicPlayer.play();
-    await Future.delayed(const Duration(milliseconds: 250));
+    await Future<void>.delayed(const Duration(milliseconds: 250));
     await _bgMusicPlayer.stop();
     _bgMusicPlayer.setVolume(1.0);
     _isBattleMusicPlaying = true;
@@ -42,9 +42,9 @@ class AudioService {
 
     // Crossfade: lower battle, raise bg over 500ms
     _battleMusicPlayer.setVolume(0.3);
-    await Future.delayed(const Duration(milliseconds: 250));
+    await Future<void>.delayed(const Duration(milliseconds: 250));
     await _bgMusicPlayer.play();
-    await Future.delayed(const Duration(milliseconds: 250));
+    await Future<void>.delayed(const Duration(milliseconds: 250));
     await _battleMusicPlayer.stop();
     _battleMusicPlayer.setVolume(1.0);
     _isBattleMusicPlaying = false;

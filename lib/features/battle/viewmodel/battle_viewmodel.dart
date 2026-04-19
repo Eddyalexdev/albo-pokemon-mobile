@@ -15,11 +15,11 @@ class BattleViewModel extends ChangeNotifier {
   String? _error;
   bool _isMyTurn = false;
   List<String> _battleLog = [];
-  StreamSubscription? _battleStartSub;
-  StreamSubscription? _lobbyStatusSub;
-  StreamSubscription? _turnResultSub;
-  StreamSubscription? _battleEndSub;
-  StreamSubscription? _errorSub;
+  StreamSubscription<Lobby>? _battleStartSub;
+  StreamSubscription<Lobby>? _lobbyStatusSub;
+  StreamSubscription<({Lobby lobby, TurnRecord turn})>? _turnResultSub;
+  StreamSubscription<({Lobby lobby, String winnerPlayerId})>? _battleEndSub;
+  StreamSubscription<String>? _errorSub;
 
   BattleViewModel({required SocketService socketService})
       : _socketService = socketService {
