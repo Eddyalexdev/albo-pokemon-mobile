@@ -124,6 +124,14 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
             });
           }
 
+          // Show pokemon entered banner
+          if (viewModel.lastEnteredPokemon != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _showTransientBanner('¡${viewModel.lastEnteredPokemon} entra al combate!');
+              viewModel.clearEnteredFlag();
+            });
+          }
+
           // Show result dialog when battle ends (only once via flag in viewModel)
           if (viewModel.battleEnded && viewModel.winnerId != null && !viewModel.resultDialogShown) {
             final isVictory = viewModel.winnerId == viewModel.playerId;

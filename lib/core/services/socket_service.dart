@@ -12,6 +12,8 @@ class SocketService {
   final _lobbyStatusController = StreamController<Lobby>.broadcast();
   final _battleStartController = StreamController<Lobby>.broadcast();
   final _turnResultController = StreamController<({Lobby lobby, TurnRecord turn})>.broadcast();
+  final _pokemonDefeatedController = StreamController<({Lobby lobby, String playerId, int pokemonId, String pokemonName})>.broadcast();
+  final _pokemonEnteredController = StreamController<({Lobby lobby, String playerId, int pokemonId, String pokemonName})>.broadcast();
   final _battleEndController = StreamController<({Lobby lobby, String winnerPlayerId})>.broadcast();
   final _errorController = StreamController<String>.broadcast();
 
@@ -29,6 +31,14 @@ class SocketService {
   /// Stream of turn results.
   Stream<({Lobby lobby, TurnRecord turn})> get turnResultStream =>
       _turnResultController.stream;
+
+  /// Stream of pokemon defeated events.
+  Stream<({Lobby lobby, String playerId, int pokemonId, String pokemonName})> get pokemonDefeatedStream =>
+      _pokemonDefeatedController.stream;
+
+  /// Stream of pokemon entered events.
+  Stream<({Lobby lobby, String playerId, int pokemonId, String pokemonName})> get pokemonEnteredStream =>
+      _pokemonEnteredController.stream;
 
   /// Stream of battle end events.
   Stream<({Lobby lobby, String winnerPlayerId})> get battleEndStream =>
@@ -106,6 +116,38 @@ class SocketService {
       _turnResultController.add((
         lobby: Lobby.fromJson(Map<String, dynamic>.from(map['lobby'] as Map)),
         turn: TurnRecord.fromJson(Map<String, dynamic>.from(map['turn'] as Map)),
+      ));
+    });
+
+    _socket!.on('pokemon_defeated', (data) {
+      final map = Map<String, dynamic>.from(data as Map);
+      final lobby = Lobby.fromJson(Map<String, dynamic>.from(map['lobby'] as Map));
+      final playerId = map['playerId']?.toString() ?? '';
+      final pokemonId = (map['pokemonId'] as num?)?.toInt() ?? 0;
+      // Get pokemon name from lobby
+      final player = lobby.playerById(playerId);
+      final pokemonName = player?.team.firstWhere((p) => p.id == pokemonId.toString(), orElse: () => player.team.first).name ?? 'Pokémon';
+      _pokemonDefeatedController.add((
+        lobby: lobby,
+        playerId: playerId,
+        pokemonId: pokemonId,
+        pokemonName: pokemonName,
+      ));
+    });
+
+    _socket!.on('pokemon_entered', (data) {
+      final map = Map<String, dynamic>.from(data as Map);
+      final lobby = Lobby.fromJson(Map<String, dynamic>.from(map['lobby'] as Map));
+      final playerId = map['playerId']?.toString() ?? '';
+      final pokemonId = (map['pokemonId'] as num?)?.toInt() ?? 0;
+      // Get pokemon name from lobby
+      final player = lobby.playerById(playerId);
+      final pokemonName = player?.team.firstWhere((p) => p.id == pokemonId.toString(), orElse: () => player.team.first).name ?? 'Pokémon';
+      _pokemonEnteredController.add((
+        lobby: lobby,
+        playerId: playerId,
+        pokemonId: pokemonId,
+        pokemonName: pokemonName,
       ));
     });
 
@@ -194,6 +236,8 @@ class SocketService {
     _lobbyStatusController.close();
     _battleStartController.close();
     _turnResultController.close();
+    _pokemonDefeatedController.close();
+    _pokemonEnteredController.close();
     _battleEndController.close();
     _errorController.close();
   }

@@ -21,11 +21,14 @@ class BattleViewModel extends ChangeNotifier {
   // Transient UI flags
   bool _battleJustStarted = false;
   String? _lastDefeatedPokemon;
+  String? _lastEnteredPokemon;
   bool _resultDialogShown = false;
 
   StreamSubscription<Lobby>? _battleStartSub;
   StreamSubscription<Lobby>? _lobbyStatusSub;
   StreamSubscription<({Lobby lobby, TurnRecord turn})>? _turnResultSub;
+  StreamSubscription<({Lobby lobby, String playerId, int pokemonId, String pokemonName})>? _pokemonDefeatedSub;
+  StreamSubscription<({Lobby lobby, String playerId, int pokemonId, String pokemonName})>? _pokemonEnteredSub;
   StreamSubscription<({Lobby lobby, String winnerPlayerId})>? _battleEndSub;
   StreamSubscription<String>? _errorSub;
 
@@ -42,6 +45,7 @@ class BattleViewModel extends ChangeNotifier {
   bool get shouldReturnToStart => _shouldReturnToStart;
   bool get battleJustStarted => _battleJustStarted;
   String? get lastDefeatedPokemon => _lastDefeatedPokemon;
+  String? get lastEnteredPokemon => _lastEnteredPokemon;
   bool get resultDialogShown => _resultDialogShown;
 
   Player? get currentPlayer => _lobby?.playerById(_playerId ?? '');
@@ -90,7 +94,7 @@ class BattleViewModel extends ChangeNotifier {
 
       if (attacker != null && defender != null) {
         _addLog('${attacker.nickname} ataca!');
-        _addLog('${defender.nickname} recibe ${data.turn.damage} de daño');
+        _addLog('${defender.nickname} recibe ${data.turn.damage} de daño (HP: ${data.turn.defenderHpAfter})');
 
         if (data.turn.defenderDefeated) {
           _lastDefeatedPokemon = defender.nickname;
@@ -98,6 +102,20 @@ class BattleViewModel extends ChangeNotifier {
         }
       }
 
+      notifyListeners();
+    });
+
+    _pokemonDefeatedSub = _socketService.pokemonDefeatedStream.listen((data) {
+      _lobby = data.lobby;
+      _lastDefeatedPokemon = data.pokemonName;
+      _addLog('¡${data.pokemonName} fue derrotado!');
+      notifyListeners();
+    });
+
+    _pokemonEnteredSub = _socketService.pokemonEnteredStream.listen((data) {
+      _lobby = data.lobby;
+      _lastEnteredPokemon = data.pokemonName;
+      _addLog('${data.pokemonName} entra al combate!');
       notifyListeners();
     });
 
@@ -134,6 +152,11 @@ class BattleViewModel extends ChangeNotifier {
   /// Clear the defeated pokemon flag after showing banner.
   void clearDefeatedFlag() {
     _lastDefeatedPokemon = null;
+  }
+
+  /// Clear the entered pokemon flag after showing banner.
+  void clearEnteredFlag() {
+    _lastEnteredPokemon = null;
   }
 
   /// Mark that the result dialog has been shown.
@@ -174,6 +197,8 @@ class BattleViewModel extends ChangeNotifier {
     _battleStartSub?.cancel();
     _lobbyStatusSub?.cancel();
     _turnResultSub?.cancel();
+    _pokemonDefeatedSub?.cancel();
+    _pokemonEnteredSub?.cancel();
     _battleEndSub?.cancel();
     _errorSub?.cancel();
     super.dispose();
