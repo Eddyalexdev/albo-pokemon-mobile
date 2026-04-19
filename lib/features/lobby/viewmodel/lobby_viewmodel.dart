@@ -87,6 +87,10 @@ class LobbyViewModel extends ChangeNotifier {
       _playerId = result.playerId;
       _isJoined = true;
       _addLog('Te uniste al lobby como $nick (ID: $_playerId)');
+
+      // Auto-assign team on join
+      await assignTeam();
+
       notifyListeners();
     } catch (e) {
       _error = 'Error al conectar: $e';

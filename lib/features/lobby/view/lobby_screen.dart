@@ -207,29 +207,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   Widget _buildActions(LobbyViewModel viewModel) {
-    final canAssign = viewModel.canAssignTeam && !viewModel.isLoadingTeam;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.md),
-      child: Row(
-        children: [
-          Expanded(
-            child: AppButton(
-              label: viewModel.isLoadingTeam ? 'CARGANDO...' : 'ASIGNAR EQUIPO',
-              onPressed: canAssign ? viewModel.assignTeam : null,
-              enabled: canAssign,
-              variant: AppButtonVariant.gold
-            ),
-          ),
-          const SizedBox(width: DesignSpacing.md),
-          Expanded(
-            child: AppButton(
-              label: 'LISTO',
-              onPressed: viewModel.canReady ? viewModel.ready : null,
-              enabled: viewModel.canReady,
-            ),
-          ),
-        ],
+      child: AppButton(
+        label: 'LISTO',
+        onPressed: viewModel.canReady ? viewModel.ready : null,
+        enabled: viewModel.canReady,
       ),
     );
   }
