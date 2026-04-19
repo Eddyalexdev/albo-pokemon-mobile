@@ -2,6 +2,8 @@
 
 A Pokemon battle app built with Flutter. Connect to a battle server, pick a team, and fight in real-time against another player.
 
+![App Screenshot](./assets/screenshot.png)
+
 ## Quick Start
 
 ### 1. Install Dependencies
