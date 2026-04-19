@@ -1,8 +1,8 @@
-# 📱 Pokémon Stadium Lite - Mobile
+# Pokemon Stadium Lite - Mobile
 
 A Pokemon battle app built with Flutter. Connect to a battle server, pick a team, and fight in real-time against another player.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Install Dependencies
 
@@ -28,7 +28,7 @@ flutter build apk --debug
 
 The APK will be at: `build/app/outputs/flutter-apk/app-debug.apk`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 lib/
@@ -50,13 +50,13 @@ lib/
     └── models/                 # Data models
 ```
 
-## 📖 Documentation
+## Documentation
 
 - [Flow Diagrams](./docs/01-flows.md) - Main app flows as diagrams
 - [Entities](./docs/02-entities.md) - Data models and their relationships
 - [Logic](./docs/03-logic.md) - How the app works internally
 
-## 🎮 Features
+## Features
 
 - **Real-time battles** via Socket.IO
 - **Auto team assignment** - Get 3 random Pokemon on join
@@ -64,13 +64,13 @@ lib/
 - **Live notifications** - Battle events shown as banners
 - **Responsive design** - Works on mobile and tablet
 
-## 🧪 Tech Stack
+## Tech Stack
 
 - **Flutter** - UI framework
 - **Provider** - State management
 - **Socket.IO Client** - Real-time communication
 - **SharedPreferences** - Local storage
 
-## 📄 License
+## License
 
 MIT
