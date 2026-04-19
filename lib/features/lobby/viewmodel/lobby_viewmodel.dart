@@ -87,11 +87,11 @@ class LobbyViewModel extends ChangeNotifier {
       _playerId = result.playerId;
       _isJoined = true;
       _addLog('Te uniste al lobby como $nick (ID: $_playerId)');
-
-      // Auto-assign team on join
-      await assignTeam();
-
       notifyListeners();
+
+      // Wait a bit for lobby state to sync, then auto-assign team
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      await assignTeam();
     } catch (e) {
       _error = 'Error al conectar: $e';
       _addLog('Error: $_error');
