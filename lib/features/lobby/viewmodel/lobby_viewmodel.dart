@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/api_constants.dart';
-import '../../../core/repositories/pokemon_repository.dart';
 import '../../../core/services/socket_service.dart';
 import '../../../shared/models/lobby_state.dart';
 import '../../../shared/models/player.dart';
@@ -14,7 +13,6 @@ import '../../../shared/models/pokemon.dart';
 class LobbyViewModel extends ChangeNotifier {
   final SharedPreferences _prefs;
   final SocketService _socketService;
-  final PokemonRepository _pokemonRepository;
 
   Lobby? _lobby;
   String? _playerId;
@@ -33,10 +31,8 @@ class LobbyViewModel extends ChangeNotifier {
   LobbyViewModel({
     required SharedPreferences prefs,
     required SocketService socketService,
-    required PokemonRepository pokemonRepository,
   })  : _prefs = prefs,
-        _socketService = socketService,
-        _pokemonRepository = pokemonRepository;
+        _socketService = socketService;
 
   Lobby? get lobby => _lobby;
   String? get playerId => _playerId;

@@ -91,14 +91,12 @@ class PokemonStadiumApp extends StatelessWidget {
           create: (_) => LobbyViewModel(
             prefs: _.read<SharedPreferences>(),
             socketService: _.read<SocketService>(),
-            pokemonRepository: _.read<PokemonRepository>(),
           ),
           update: (_, prefs, socketService, previous) =>
               previous ??
               LobbyViewModel(
                 prefs: prefs,
                 socketService: socketService,
-                pokemonRepository: _.read<PokemonRepository>(),
               ),
         ),
         ChangeNotifierProvider<BattleViewModel>(
