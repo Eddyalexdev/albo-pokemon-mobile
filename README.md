@@ -1,4 +1,6 @@
-# Pokémon Stadium Lite — Mobile (Flutter)
+# albo pokemon app mobile by Eddy
+
+![App Screenshot](assets/screenshot.png)
 
 Flutter app with Riverpod + socket_io_client following **Clean Architecture**.
 
