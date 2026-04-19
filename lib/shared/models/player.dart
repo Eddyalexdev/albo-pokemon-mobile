@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 
 import 'pokemon.dart';
 
-/// Player in the lobby or battle.
 class Player extends Equatable {
   final String id;
   final String nickname;
@@ -31,7 +30,6 @@ class Player extends Equatable {
     );
   }
 
-  /// Pokemon currently on the field, or null if team is empty / index out of range.
   BattlePokemon? get activePokemon {
     if (team.isEmpty) return null;
     if (activeIndex < 0 || activeIndex >= team.length) return team.first;
