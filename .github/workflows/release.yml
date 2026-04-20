@@ -22,6 +22,8 @@ jobs:
 
       - run: flutter analyze
 
+      - run: flutter test
+
   # Job 2: Build APK (runs after quality-checks passes)
   build:
     runs-on: ubuntu-latest

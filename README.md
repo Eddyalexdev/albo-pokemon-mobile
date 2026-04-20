@@ -58,6 +58,22 @@ lib/
 - [Entities](./docs/02-entities.md) - Data models and their relationships
 - [Logic](./docs/03-logic.md) - How the app works internally
 
+## Testing
+
+```bash
+flutter test
+```
+
+**Current coverage**: 146 tests passing
+- **Models**: `pokemon_test.dart`, `player_test.dart`, `lobby_state_test.dart` — 50 tests
+- **ViewModels**: `start_viewmodel_test.dart`, `config_viewmodel_test.dart`, `lobby_viewmodel_test.dart`, `battle_viewmodel_test.dart` — 96 tests
+
+**CI Gates**:
+- `lint.yml` — Runs `flutter analyze` + `flutter test` on every PR
+- `release.yml` — Runs `flutter test` before building APK on every release tag
+
+**Mock strategy**: `MockSocketService` implements `ISocketService` for isolated viewmodel testing. See `docs/01-flows.md` §8 for testing patterns.
+
 ## Features
 
 - **Real-time battles** via Socket.IO

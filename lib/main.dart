@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/constants/api_constants.dart';
 import 'core/repositories/pokemon_repository.dart';
 import 'core/services/audio_service.dart';
+import 'core/services/i_socket_service.dart';
 import 'core/services/pokemon_api_service.dart';
 import 'core/services/socket_service.dart';
 import 'core/theme/app_theme.dart';
@@ -74,7 +75,7 @@ class PokemonStadiumApp extends StatelessWidget {
         Provider<SharedPreferences>.value(value: prefs),
 
         // Services
-        Provider<SocketService>(
+        Provider<ISocketService>(
           create: (_) => SocketService(),
           dispose: (_, service) => service.dispose(),
         ),
@@ -100,10 +101,10 @@ class PokemonStadiumApp extends StatelessWidget {
         ChangeNotifierProvider<StartViewModel>(
           create: (ctx) => StartViewModel(prefs: ctx.read<SharedPreferences>()),
         ),
-        ChangeNotifierProxyProvider2<SharedPreferences, SocketService, LobbyViewModel>(
+        ChangeNotifierProxyProvider2<SharedPreferences, ISocketService, LobbyViewModel>(
           create: (ctx) => LobbyViewModel(
             prefs: ctx.read<SharedPreferences>(),
-            socketService: ctx.read<SocketService>(),
+            socketService: ctx.read<ISocketService>(),
           ),
           update: (_, prefs, socketService, previous) =>
               previous ??
@@ -115,7 +116,7 @@ class PokemonStadiumApp extends StatelessWidget {
         ChangeNotifierProvider<BattleViewModel>(
           lazy: false,
           create: (ctx) => BattleViewModel(
-            socketService: ctx.read<SocketService>(),
+            socketService: ctx.read<ISocketService>(),
           ),
         ),
       ],

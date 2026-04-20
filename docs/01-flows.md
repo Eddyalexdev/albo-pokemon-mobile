@@ -407,3 +407,113 @@ Also:
 │  }                                                         │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 8. Testing Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      TESTING                                 │
+└─────────────────────────────────────────────────────────────┘
+
+                    ┌─────────────────┐
+                    │  flutter test   │
+                    └────────┬────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   TEST STRUCTURE                           │
+│                                                             │
+│  test/                                                      │
+│  ├── mocks/                    # MockSocketService          │
+│  │   └── mock_socket_service.dart                          │
+│  ├── models/                  # Pure Dart model tests       │
+│  │   ├── pokemon_test.dart                                 │
+│  │   ├── player_test.dart                                 │
+│  │   └── lobby_state_test.dart                            │
+│  └── viewmodels/             # ViewModel tests with mocks  │
+│      ├── start_viewmodel_test.dart                        │
+│      ├── config_viewmodel_test.dart                       │
+│      ├── lobby_viewmodel_test.dart                        │
+│      └── battle_viewmodel_test.dart                       │
+└─────────────────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   MOCKING STRATEGY                          │
+│                                                             │
+│  ISocketService (interface)                                 │
+│      │                                                      │
+│      └──► SocketService (real) ──► MockSocketService (test)│
+│                                                             │
+│  MockSocketService provides:                                │
+│  • Controllable streams (emitBattleStart, emitError, etc.) │
+│  • Call tracking (callLog)                                   │
+│  • Configurable success/failure                             │
+│  • Join lobby simulation (_currentPlayerId)                 │
+└─────────────────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 CI/CD GATES                                 │
+│                                                             │
+│  lint.yml:                                                  │
+│    • flutter analyze ──► MUST PASS                         │
+│    • flutter test ────► MUST PASS                           │
+│                                                             │
+│  release.yml (on tag v*):                                   │
+│    • quality-checks (analyze + test) ──► MUST PASS          │
+│    • build (flutter build apk)                              │
+│    • release (GitHub Release)                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 9. Key Testing Patterns
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│            STREAM-BASED TESTING PATTERN                     │
+│                                                             │
+│  Problem: Stream subscriptions are async — test assertions │
+│           run before the stream handler executes.            │
+│                                                             │
+│  Solution:                                                   │
+│  1. Emit event via mock                                     │
+│  2. await Future.delayed(Duration(milliseconds: 16))        │
+│  3. THEN assert state                                        │
+│                                                             │
+│  Example:                                                    │
+│  ```dart                                                    │
+│  mockSocket.emitBattleStart(lobby);                          │
+│  await Future.delayed(Duration(milliseconds: 16));          │
+│  expect(viewModel.battleLog, isNotEmpty);                    │
+│  ```                                                        │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│           MOCK SOCKET STATE PATTERN                         │
+│                                                             │
+│  BattleViewModel reads _socketService.currentPlayerId        │
+│  on battle_start. Mock must simulate joinLobby first:        │
+│                                                             │
+│  ```dart                                                    │
+│  mockSocket.joinLobbyPlayerId = 'player-1';                 │
+│  await mockSocket.joinLobby('TestPlayer'); // Sets internal │
+│  mockSocket.emitBattleStart(lobby);                         │
+│  await Future.delayed(Duration(milliseconds: 16));          │
+│  ```                                                        │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│           LOBBY STATE INJECTION PATTERN                     │
+│                                                             │
+│  To test LobbyViewModel.ready() with no team:               │
+│  1. initialize(autoAssign: false)                           │
+│  2. Emit lobby_status with player who has empty team         │
+│  3. await Future.delayed(Duration(milliseconds: 16))        │
+│  4. Call ready() and assert error message                   │
+└─────────────────────────────────────────────────────────────┘
+```
