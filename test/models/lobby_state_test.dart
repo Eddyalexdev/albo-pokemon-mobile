@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pokemon_stadium/shared/models/lobby_state.dart';
 import 'package:pokemon_stadium/shared/models/player.dart';
-import 'package:pokemon_stadium/shared/models/pokemon.dart';
 
 void main() {
   group('LobbyStatus', () {
@@ -25,21 +24,21 @@ void main() {
 
   group('Lobby', () {
     test('fromJson creates Lobby correctly', () {
-      final json = {
+      final json = <String, dynamic>{
         'id': 'lobby-123',
         'status': 'waiting',
-        'players': [
+        'players': <Map<String, dynamic>>[
           {
             'id': 'p1',
             'nickname': 'Ash',
-            'team': [],
+            'team': <Map<String, dynamic>>[],
             'activeIndex': 0,
             'ready': true,
           },
           {
             'id': 'p2',
             'nickname': 'Misty',
-            'team': [],
+            'team': <Map<String, dynamic>>[],
             'activeIndex': 0,
             'ready': false,
           },
@@ -126,7 +125,7 @@ void main() {
       });
 
       test('returns null for empty lobby', () {
-        final lobby = Lobby(
+        final lobby = const Lobby(
           id: 'lobby-123',
           status: LobbyStatus.waiting,
           players: [],
@@ -237,15 +236,15 @@ void main() {
     });
 
     test('props includes all fields for equality', () {
-      final json1 = {
+      final json1 = <String, dynamic>{
         'id': 'lobby-123',
         'status': 'waiting',
-        'players': [],
+        'players': <Map<String, dynamic>>[],
       };
-      final json2 = {
+      final json2 = <String, dynamic>{
         'id': 'lobby-123',
         'status': 'waiting',
-        'players': [],
+        'players': <Map<String, dynamic>>[],
       };
 
       final lobby1 = Lobby.fromJson(json1);
@@ -377,7 +376,7 @@ Player _createPlayer(String id, String nickname) {
   return Player(
     id: id,
     nickname: nickname,
-    team: [],
+    team: const [],
     activeIndex: 0,
     ready: false,
   );

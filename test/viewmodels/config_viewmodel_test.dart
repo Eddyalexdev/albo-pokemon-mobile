@@ -122,7 +122,7 @@ void main() {
         final result = await viewModel.saveUrl();
 
         expect(result, true);
-        expect(await prefs.getString('server_url'), 'http://localhost:8080');
+        expect(prefs.getString('server_url'), 'http://localhost:8080');
       });
 
       test('isLoading is false after save', () async {

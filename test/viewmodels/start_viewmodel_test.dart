@@ -114,7 +114,7 @@ void main() {
         final result = await viewModel.saveNickname();
 
         expect(result, true);
-        expect(await prefs.getString('nickname'), 'Gary');
+        expect(prefs.getString('nickname'), 'Gary');
       });
 
       test('trims whitespace before saving', () async {
@@ -122,7 +122,7 @@ void main() {
         final result = await viewModel.saveNickname();
 
         expect(result, true);
-        expect(await prefs.getString('nickname'), 'Oak');
+        expect(prefs.getString('nickname'), 'Oak');
       });
     });
   });

@@ -213,7 +213,7 @@ void main() {
     });
 
     test('hpPercent returns correct percentage', () {
-      final pokemon = BattlePokemon(
+      const pokemon = BattlePokemon(
         id: '25',
         name: 'Pikachu',
         sprite: '',
@@ -229,7 +229,7 @@ void main() {
     });
 
     test('hpPercent clamps to 0.0 when hp is negative', () {
-      final pokemon = BattlePokemon(
+      const pokemon = BattlePokemon(
         id: '25',
         name: 'Pikachu',
         sprite: '',
@@ -245,7 +245,7 @@ void main() {
     });
 
     test('hpPercent clamps to 1.0 when hp exceeds maxHp', () {
-      final pokemon = BattlePokemon(
+      const pokemon = BattlePokemon(
         id: '25',
         name: 'Pikachu',
         sprite: '',
@@ -261,7 +261,7 @@ void main() {
     });
 
     test('hpPercent returns 0.0 when maxHp is 0', () {
-      final pokemon = BattlePokemon(
+      const pokemon = BattlePokemon(
         id: '25',
         name: 'Pikachu',
         sprite: '',
@@ -277,7 +277,7 @@ void main() {
     });
 
     test('copyWith creates new instance with updated values', () {
-      final original = BattlePokemon(
+      const original = BattlePokemon(
         id: '25',
         name: 'Pikachu',
         sprite: '',

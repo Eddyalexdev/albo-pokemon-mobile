@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pokemon_stadium/features/battle/viewmodel/battle_viewmodel.dart';
 import 'package:pokemon_stadium/shared/models/lobby_state.dart';
@@ -73,7 +71,7 @@ void main() {
         await mockSocket.joinLobby('TestPlayer'); // Sets _currentPlayerId
         final lobby = _createBattlingLobby('player-1', 'player-2');
         mockSocket.emitBattleStart(lobby);
-        await Future.delayed(const Duration(milliseconds: 16)); // Let stream subscriber process the event
+        await Future.delayed(const Duration(milliseconds: 16), () {}); // Let stream subscriber process the event
 
         await viewModel.attack();
 
@@ -86,7 +84,7 @@ void main() {
         await mockSocket.joinLobby('TestPlayer'); // Sets _currentPlayerId
         final lobby = _createBattlingLobby('player-1', 'player-2');
         mockSocket.emitBattleStart(lobby);
-        await Future.delayed(const Duration(milliseconds: 16)); // Let stream subscriber process the event
+        await Future.delayed(const Duration(milliseconds: 16), () {}); // Let stream subscriber process the event
 
         await viewModel.attack();
 
@@ -98,7 +96,7 @@ void main() {
         await mockSocket.joinLobby('TestPlayer'); // Sets _currentPlayerId
         final lobby = _createBattlingLobby('player-1', 'player-2');
         mockSocket.emitBattleStart(lobby);
-        await Future.delayed(const Duration(milliseconds: 16)); // Let stream subscriber process the event
+        await Future.delayed(const Duration(milliseconds: 16), () {}); // Let stream subscriber process the event
 
         await viewModel.attack();
 
@@ -176,7 +174,7 @@ void main() {
         await mockSocket.joinLobby('TestPlayer'); // Sets _currentPlayerId
         final lobby = _createBattlingLobby('player-1', 'player-2');
         mockSocket.emitBattleStart(lobby);
-        await Future.delayed(const Duration(milliseconds: 16)); // Let stream subscriber process the event
+        await Future.delayed(const Duration(milliseconds: 16), () {}); // Let stream subscriber process the event
 
         expect(viewModel.battleLog.first, matches(RegExp(r'\[\d{2}:\d{2}:\d{2}\]')));
       });
@@ -191,10 +189,10 @@ void main() {
         await mockSocket.joinLobby('TestPlayer'); // Sets _currentPlayerId
         final lobby = _createBattlingLobby('player-1', 'player-2');
         mockSocket.emitBattleStart(lobby);
-        await Future.delayed(const Duration(milliseconds: 16)); // Let stream subscriber process the event
+        await Future.delayed(const Duration(milliseconds: 16), () {}); // Let stream subscriber process the event
 
         mockSocket.emitError('Connection lost');
-        await Future.delayed(const Duration(milliseconds: 16)); // Let error stream subscriber process
+        await Future.delayed(const Duration(milliseconds: 16), () {}); // Let error stream subscriber process
 
         expect(viewModel.error, 'Connection lost');
       });
@@ -207,7 +205,7 @@ Player _createPlayer(String id, String nickname) {
   return Player(
     id: id,
     nickname: nickname,
-    team: [],
+    team: const [],
     activeIndex: 0,
     ready: true,
   );

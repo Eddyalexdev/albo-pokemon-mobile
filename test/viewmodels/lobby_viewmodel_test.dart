@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pokemon_stadium/core/constants/api_constants.dart';
@@ -268,7 +266,7 @@ void main() {
         // Emit a lobby with the player having no team
         final lobby = _createLobby([_createPlayer('player-without-team', 'TestPlayer', [])]);
         mockSocket.emitLobbyStatus(lobby);
-        await Future.delayed(Duration.zero);
+        await Future.delayed(Duration.zero, () {});
 
         await viewModel.ready();
 
@@ -312,7 +310,7 @@ void main() {
         await viewModel.initialize(autoAssign: false);
 
         mockSocket.emitError('Test error message');
-        await Future.delayed(Duration.zero); // Let error stream subscriber process
+        await Future.delayed(Duration.zero, () {}); // Let error stream subscriber process
 
         expect(viewModel.error, 'Test error message');
       });

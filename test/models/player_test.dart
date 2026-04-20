@@ -177,10 +177,10 @@ void main() {
       });
 
       test('returns null when team is empty', () {
-        final json = {
+        final json = <String, dynamic>{
           'id': 'player-1',
           'nickname': 'Ash',
-          'team': [],
+          'team': <Map<String, dynamic>>[],
           'activeIndex': 0,
           'ready': false,
         };
@@ -192,10 +192,10 @@ void main() {
     });
 
     test('copyWith creates new instance with updated values', () {
-      final original = Player(
+      const original = Player(
         id: 'player-1',
         nickname: 'Ash',
-        team: [
+        team: <BattlePokemon>[
           BattlePokemon(
             id: '25',
             name: 'Pikachu',
@@ -221,10 +221,10 @@ void main() {
     });
 
     test('props includes all fields for equality', () {
-      final json = {
+      final json = <String, dynamic>{
         'id': 'player-1',
         'nickname': 'Ash',
-        'team': [],
+        'team': <Map<String, dynamic>>[],
         'activeIndex': 0,
         'ready': false,
       };

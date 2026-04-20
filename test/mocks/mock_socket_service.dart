@@ -22,9 +22,6 @@ class MockSocketService implements ISocketService {
       StreamController<({Lobby lobby, String winnerPlayerId})>.broadcast();
   final _errorController = StreamController<String>.broadcast();
 
-  // Completers for async methods
-  final Map<String, Completer<void>> _methodCompleters = {};
-
   // Track calls for assertions
   final List<String> callLog = [];
 
