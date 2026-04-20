@@ -4,9 +4,10 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../shared/models/lobby_state.dart';
 import '../../shared/models/pokemon.dart';
+import 'i_socket_service.dart';
 
 /// Service for Socket.IO communication with the battle server.
-class SocketService {
+class SocketService implements ISocketService {
   io.Socket? _socket;
   String? _currentPlayerId;
 
@@ -22,37 +23,47 @@ class SocketService {
   /// Player id returned by the server after a successful join_lobby.
   /// Shared across view models so navigation between screens does not need
   /// to pass this through arguments.
+  @override
   String? get currentPlayerId => _currentPlayerId;
 
   /// Stream of lobby status updates.
+  @override
   Stream<Lobby> get lobbyStatusStream => _lobbyStatusController.stream;
 
   /// Stream of battle start events.
+  @override
   Stream<Lobby> get battleStartStream => _battleStartController.stream;
 
   /// Stream of turn results.
+  @override
   Stream<({Lobby lobby, TurnRecord turn})> get turnResultStream =>
       _turnResultController.stream;
 
   /// Stream of pokemon defeated events.
+  @override
   Stream<({Lobby lobby, String playerId, int pokemonId, String pokemonName})> get pokemonDefeatedStream =>
       _pokemonDefeatedController.stream;
 
   /// Stream of pokemon entered events.
+  @override
   Stream<({Lobby lobby, String playerId, int pokemonId, String pokemonName})> get pokemonEnteredStream =>
       _pokemonEnteredController.stream;
 
   /// Stream of battle end events.
+  @override
   Stream<({Lobby lobby, String winnerPlayerId})> get battleEndStream =>
       _battleEndController.stream;
 
   /// Stream of error messages.
+  @override
   Stream<String> get errorStream => _errorController.stream;
 
   /// Whether the socket is currently connected.
+  @override
   bool get isConnected => _socket?.connected ?? false;
 
   /// Connect to the battle server.
+  @override
   Future<void> connect(String baseUrl) async {
     if (_socket?.connected ?? false) return;
 
@@ -183,6 +194,7 @@ class SocketService {
   }
 
   /// Disconnect from the server.
+  @override
   void disconnect() {
     _socket?.disconnect();
     _socket?.dispose();
@@ -191,6 +203,7 @@ class SocketService {
   }
 
   /// Join a lobby with the given nickname.
+  @override
   Future<({String playerId, String lobbyId})> joinLobby(String nickname) async {
     final result = await _emitAck('join_lobby', {'nickname': nickname});
     final playerId = result['playerId'] as String;
@@ -202,21 +215,25 @@ class SocketService {
   }
 
   /// Request random Pokemon team assignment.
+  @override
   Future<void> assignPokemon() async {
     await _emitAck('assign_pokemon', {});
   }
 
   /// Mark player as ready.
+  @override
   Future<void> ready() async {
     await _emitAck('ready', {});
   }
 
   /// Execute an attack.
+  @override
   Future<void> attack() async {
     await _emitAck('attack', {});
   }
 
   /// Reset the lobby.
+  @override
   Future<void> resetLobby() async {
     await _emitAck('reset_lobby', {});
   }
@@ -248,6 +265,7 @@ class SocketService {
   }
 
   /// Dispose all resources.
+  @override
   void dispose() {
     disconnect();
     _lobbyStatusController.close();

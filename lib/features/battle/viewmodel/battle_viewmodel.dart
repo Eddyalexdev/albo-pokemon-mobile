@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../core/services/socket_service.dart';
+import '../../../core/services/i_socket_service.dart';
 import '../../../shared/models/lobby_state.dart';
 import '../../../shared/models/player.dart';
 
 /// ViewModel for BattleScreen - manages battle state and turns.
 class BattleViewModel extends ChangeNotifier {
-  final SocketService _socketService;
+  final ISocketService _socketService;
 
   Lobby? _lobby;
   String? _playerId;
@@ -32,7 +32,7 @@ class BattleViewModel extends ChangeNotifier {
   StreamSubscription<({Lobby lobby, String winnerPlayerId})>? _battleEndSub;
   StreamSubscription<String>? _errorSub;
 
-  BattleViewModel({required SocketService socketService})
+  BattleViewModel({required ISocketService socketService})
       : _socketService = socketService {
     _setupListeners();
   }
@@ -54,7 +54,7 @@ class BattleViewModel extends ChangeNotifier {
   bool get battleEnded => _lobby?.status == LobbyStatus.finished;
 
   void _setupListeners() {
-    _battleStartSub = _socketService.battleStartStream.listen((lobby) {
+    _battleStartSub = _socketService.battleStartStream.listen((Lobby lobby) {
       _lobby = lobby;
       _playerId = _socketService.currentPlayerId;
       _isMyTurn = lobby.currentTurnPlayerId == _playerId;
@@ -71,7 +71,7 @@ class BattleViewModel extends ChangeNotifier {
     // The server emits lobby_status AFTER switchTurn(), so this is what
     // actually rotates currentTurnPlayerId. turn_result arrives first but
     // still carries the pre-rotation snapshot.
-    _lobbyStatusSub = _socketService.lobbyStatusStream.listen((lobby) {
+    _lobbyStatusSub = _socketService.lobbyStatusStream.listen((Lobby lobby) {
       if (_playerId == null) return;
       _lobby = lobby;
       _isMyTurn = lobby.currentTurnPlayerId == _playerId;
@@ -85,7 +85,8 @@ class BattleViewModel extends ChangeNotifier {
       notifyListeners();
     });
 
-    _turnResultSub = _socketService.turnResultStream.listen((data) {
+    _turnResultSub = _socketService.turnResultStream.listen(
+        (({Lobby lobby, TurnRecord turn}) data) {
       _lobby = data.lobby;
       _isMyTurn = data.lobby.currentTurnPlayerId == _playerId;
 
@@ -105,21 +106,32 @@ class BattleViewModel extends ChangeNotifier {
       notifyListeners();
     });
 
-    _pokemonDefeatedSub = _socketService.pokemonDefeatedStream.listen((data) {
+    _pokemonDefeatedSub =
+        _socketService.pokemonDefeatedStream.listen(((
+            {Lobby lobby,
+            String playerId,
+            int pokemonId,
+            String pokemonName}) data) {
       _lobby = data.lobby;
       _lastDefeatedPokemon = data.pokemonName;
       _addLog('¡${data.pokemonName} fue derrotado!');
       notifyListeners();
     });
 
-    _pokemonEnteredSub = _socketService.pokemonEnteredStream.listen((data) {
+    _pokemonEnteredSub =
+        _socketService.pokemonEnteredStream.listen(((
+            {Lobby lobby,
+            String playerId,
+            int pokemonId,
+            String pokemonName}) data) {
       _lobby = data.lobby;
       _lastEnteredPokemon = data.pokemonName;
       _addLog('${data.pokemonName} entra al combate!');
       notifyListeners();
     });
 
-    _battleEndSub = _socketService.battleEndStream.listen((data) {
+    _battleEndSub =
+        _socketService.battleEndStream.listen((({Lobby lobby, String winnerPlayerId}) data) {
       _lobby = data.lobby;
       _isMyTurn = false;
       _inBattle = false;
@@ -132,7 +144,7 @@ class BattleViewModel extends ChangeNotifier {
       notifyListeners();
     });
 
-    _errorSub = _socketService.errorStream.listen((error) {
+    _errorSub = _socketService.errorStream.listen((String error) {
       _error = error;
       _addLog('Error: $error');
       notifyListeners();

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/api_constants.dart';
-import '../../../core/services/socket_service.dart';
+import '../../../core/services/i_socket_service.dart';
 import '../../../shared/models/lobby_state.dart';
 import '../../../shared/models/player.dart';
 import '../../../shared/models/pokemon.dart';
@@ -12,7 +12,8 @@ import '../../../shared/models/pokemon.dart';
 /// ViewModel for LobbyScreen - manages lobby state and team selection.
 class LobbyViewModel extends ChangeNotifier {
   final SharedPreferences _prefs;
-  final SocketService _socketService;
+  final ISocketService _socketService;
+  final Duration _autoAssignDelay;
 
   Lobby? _lobby;
   String? _playerId;
@@ -32,11 +33,19 @@ class LobbyViewModel extends ChangeNotifier {
   /// Callback triggered when user wants to change nickname
   VoidCallback? onNicknameChange;
 
+  /// Creates a LobbyViewModel.
+  ///
+  /// [prefs] - SharedPreferences instance for persisting settings.
+  /// [socketService] - Socket service for real-time communication.
+  /// [autoAssignDelay] - Delay before auto-assigning team after joining lobby.
+  ///                      Defaults to 500ms. Use Duration.zero for testing.
   LobbyViewModel({
     required SharedPreferences prefs,
-    required SocketService socketService,
+    required ISocketService socketService,
+    Duration? autoAssignDelay,
   })  : _prefs = prefs,
-        _socketService = socketService;
+        _socketService = socketService,
+        _autoAssignDelay = autoAssignDelay ?? const Duration(milliseconds: 500);
 
   Lobby? get lobby => _lobby;
   String? get playerId => _playerId;
@@ -64,7 +73,8 @@ class LobbyViewModel extends ChangeNotifier {
   String? get serverUrl => _prefs.getString(ApiConstants.keyServerUrl);
 
   /// Initialize the lobby - connect socket and join.
-  Future<void> initialize() async {
+  /// Optionally auto-assigns team after joining if [autoAssignDelay] > zero.
+  Future<void> initialize({bool autoAssign = true}) async {
     final url = serverUrl;
     final nick = nickname;
 
@@ -89,9 +99,11 @@ class LobbyViewModel extends ChangeNotifier {
       _addLog('Te uniste al lobby como $nick (ID: $_playerId)');
       notifyListeners();
 
-      // Wait a bit for lobby state to sync, then auto-assign team
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-      await assignTeam();
+      // Wait for lobby state to sync, then auto-assign team
+      if (autoAssign && _autoAssignDelay.inMilliseconds >= 0) {
+        await Future<void>.delayed(_autoAssignDelay);
+        await assignTeam();
+      }
     } catch (e) {
       _error = 'Error al conectar: $e';
       _addLog('Error: $_error');
@@ -100,13 +112,13 @@ class LobbyViewModel extends ChangeNotifier {
   }
 
   void _setupListeners() {
-    _lobbyStatusSub = _socketService.lobbyStatusStream.listen((lobby) {
+    _lobbyStatusSub = _socketService.lobbyStatusStream.listen((Lobby lobby) {
       _lobby = lobby;
       _addLog(_describeLobbyUpdate(lobby));
       notifyListeners();
     });
 
-    _battleStartSub = _socketService.battleStartStream.listen((lobby) {
+    _battleStartSub = _socketService.battleStartStream.listen((Lobby lobby) {
       _lobby = lobby;
       _addLog('¡La batalla está por comenzar!');
       notifyListeners();
@@ -114,7 +126,7 @@ class LobbyViewModel extends ChangeNotifier {
       onBattleStartEvent?.call();
     });
 
-    _errorSub = _socketService.errorStream.listen((error) {
+    _errorSub = _socketService.errorStream.listen((String error) {
       _error = error;
       _addLog('Error: $error');
       notifyListeners();
